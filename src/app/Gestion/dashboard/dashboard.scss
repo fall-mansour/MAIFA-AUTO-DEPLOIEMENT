@@ -1,0 +1,1101 @@
+// ============================================================
+//  MAIFA-AUTO — TABLEAU DE BORD
+//  Palette du logo : bleu nuit #12314B + orange #F2762E
+//
+//  Repartition propre aux pages de gestion : le bleu nuit
+//  structure, l'orange signale ce qui demande une action
+//  (commandes en attente, ajout d'une piece).
+// ============================================================
+
+// -- Bleu nuit : structure, titres, fonds --
+$navy-900: #081724;
+$navy-800: #0b1f30;
+$navy: #12314b; // couleur exacte du logo
+$navy-600: #1b4a6f;
+$navy-400: #3f80b0;
+
+// -- Orange : actions et points chauds --
+// Le blanc sur orange ne donne que 2.84:1, insuffisant pour du petit
+// texte. Les boutons orange portent donc un texte bleu nuit (4.73:1).
+// $orange-700 est la seule nuance lisible en TEXTE sur blanc.
+$orange-700: #c25317;
+// Nuance plus soutenue, pour les textes poses sur un aplat orange clair
+// ou $orange-700 tombe sous 4.5:1
+$orange-800: #a8480f;
+$orange-600: #d9631f;
+$orange: #f2762e; // couleur exacte du logo
+$orange-400: #ff9052;
+$orange-50: #fff4ed;
+
+// -- Alias conserves, pour ne rien casser dans le fichier --
+$blue: $navy;
+$blue-hi: $navy-600;
+$blue-deep: $navy-800;
+$sky: #e7eef5;
+$sky-soft: #f4f7fa;
+
+$page: #f6f8fb;
+$card: #ffffff;
+$line: #dfe5ee;
+$line-strong: #c3cddb;
+
+$text: $navy;
+$dim: #435a76;
+
+// Nuances calees sur le seuil de lisibilite AA (4.5:1 sur blanc) :
+// le gris clair habituel n'atteignait que 2.8:1
+$mute: #647489;
+$mute-light: #8d9bb0; // bordures et icones uniquement, jamais du texte
+
+$green: #077f55;
+$amber: #9e5f08;
+$red: #cc1f1f;
+$slate: $mute-light;
+
+$shadow-sm:
+  0 1px 2px rgba($navy, 0.06),
+  0 4px 14px rgba($navy, 0.07);
+$shadow-md: 0 10px 30px rgba($navy, 0.12);
+$shadow-orange: 0 6px 20px rgba($orange, 0.38);
+
+$r-sm: 10px;
+$r-md: 14px;
+$r-lg: 20px;
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: $page;
+  color: $text;
+  font-family: 'Barlow', 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+}
+
+.ta-right {
+  text-align: right;
+}
+
+.page {
+  max-width: 1340px;
+  margin: 0 auto;
+  padding: 24px 24px 64px;
+}
+
+// ===== BARRE HAUTE =====
+.entete {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 24px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid $line;
+
+  // Logo horizontal en PNG transparent : ni pastille ni bordure
+  .logo {
+    height: 44px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  &__title {
+    flex: 1;
+    min-width: 0;
+
+    h1 {
+      margin: 0;
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: $blue-deep;
+    }
+
+    p {
+      margin: 1px 0 0;
+      font-size: 0.86rem;
+      color: $mute;
+    }
+  }
+
+  &__nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    > a:not(.btn-add) {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: $dim;
+      font-size: 0.94rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.18s ease;
+
+      &:hover {
+        color: $orange-700;
+      }
+
+      // Page courante
+      &.is-active {
+        color: $orange-700;
+        text-decoration: underline;
+        text-underline-offset: 5px;
+      }
+    }
+  }
+}
+
+.btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border: 0;
+  border-radius: 99px;
+  background: linear-gradient(135deg, $orange-600, $orange 60%, $orange-400);
+  color: $navy-900;
+  font-size: 0.93rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: $shadow-orange;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+
+  svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba($orange, 0.5);
+  }
+}
+
+// ===== CHIFFRE PHARE + KPI =====
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.6fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 26px 28px;
+  border-radius: $r-lg;
+  background: linear-gradient(135deg, $navy-900, $navy 55%, $navy-600);
+  color: #fff;
+  box-shadow: 0 12px 34px rgba($navy, 0.32);
+
+  // Halo orange discret, comme sur le hero de l'accueil
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 88% 85%, rgba($orange, 0.28) 0%, transparent 55%);
+    pointer-events: none;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  &__label {
+    display: block;
+    font-size: 0.92rem;
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  &__value {
+    display: block;
+    margin-top: 4px;
+    font-size: 2.7rem;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+
+    em {
+      font-style: normal;
+      font-size: 1rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.75);
+      margin-left: 8px;
+    }
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 14px;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.82);
+
+    b {
+      color: #fff;
+      font-weight: 700;
+    }
+  }
+
+  &__split {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+}
+
+.split-bar {
+  height: 8px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.28);
+  overflow: hidden;
+
+  &__neuf {
+    display: block;
+    height: 100%;
+    background: #fff;
+    border-radius: 99px;
+    transition: width 0.5s ease;
+  }
+}
+
+.split-legend {
+  display: flex;
+  gap: 18px;
+  margin-top: 10px;
+  font-size: 0.87rem;
+  color: rgba(255, 255, 255, 0.85);
+
+  .dot--blue {
+    background: #fff;
+  }
+
+  .dot--slate {
+    background: rgba(255, 255, 255, 0.4);
+  }
+}
+
+.dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 7px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.kpi {
+  padding: 18px 20px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-md;
+  box-shadow: $shadow-sm;
+
+  &__label {
+    display: block;
+    font-size: 0.85rem;
+    color: $mute;
+  }
+
+  &__value {
+    display: block;
+    margin: 2px 0;
+    font-size: 1.85rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: $blue-deep;
+  }
+
+  &__hint {
+    font-size: 0.83rem;
+    color: $mute;
+
+    &.is-up {
+      color: $green;
+      font-weight: 600;
+    }
+  }
+
+  // Point d'attention : l'orange signale ce qui demande une action
+  &--alert {
+    border-color: rgba($orange, 0.4);
+    background: $orange-50;
+
+    .kpi__value {
+      color: $orange-800;
+    }
+  }
+}
+
+// ===== ALERTES =====
+.alerts {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.alert {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: $r-md;
+  text-decoration: none;
+  border: 1px solid;
+  transition: transform 0.18s ease;
+
+  strong {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  span {
+    font-size: 0.89rem;
+    color: $dim;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &--red {
+    background: rgba($red, 0.06);
+    border-color: rgba($red, 0.28);
+    strong {
+      color: $red;
+    }
+  }
+
+  &--amber {
+    background: rgba($amber, 0.08);
+    border-color: rgba($amber, 0.3);
+    strong {
+      color: $amber;
+    }
+  }
+
+  &--blue {
+    background: $sky;
+    border-color: rgba($navy, 0.22);
+    strong {
+      color: $navy;
+    }
+  }
+}
+
+// ===== CARTES =====
+.charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.card {
+  padding: 22px 24px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-lg;
+  box-shadow: $shadow-sm;
+
+  &__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+
+    h2 {
+      margin: 0;
+      font-size: 1.06rem;
+      font-weight: 700;
+      color: $blue-deep;
+    }
+
+    span {
+      font-size: 0.85rem;
+      color: $mute;
+    }
+
+    a {
+      font-size: 0.87rem;
+      font-weight: 700;
+      color: $orange-700;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+    }
+  }
+
+  &__note {
+    margin: 18px 0 0;
+    padding-top: 14px;
+    border-top: 1px solid $line;
+    font-size: 0.86rem;
+    color: $mute;
+  }
+
+  &--wide {
+    padding-bottom: 10px;
+  }
+}
+
+// ===== DONUT =====
+// ⚠️ Les couleurs des segments sont definies dans dashboard.ts
+//    (tableau `palette`), pas ici. Pense a les aligner.
+.donut-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 26px;
+  align-items: center;
+}
+
+.donut {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &__hole {
+    position: absolute;
+    inset: 26px;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    background: $card;
+    border-radius: 50%;
+
+    strong {
+      display: block;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: $blue-deep;
+      line-height: 1;
+    }
+
+    span {
+      font-size: 0.78rem;
+      color: $mute;
+    }
+  }
+}
+
+.legend {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid $line;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  &__nom {
+    font-size: 0.9rem;
+    color: $dim;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-transform: capitalize;
+  }
+
+  &__val {
+    font-weight: 700;
+    color: $text;
+  }
+
+  &__pct {
+    min-width: 42px;
+    text-align: right;
+    font-size: 0.85rem;
+    color: $mute;
+  }
+}
+
+// ===== HISTOGRAMME =====
+.bars {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 6px;
+  height: 168px;
+  align-items: end;
+
+  &__col {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 6px;
+    height: 100%;
+    text-align: center;
+  }
+
+  &__val {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: $orange-700;
+  }
+
+  &__track {
+    display: flex;
+    align-items: flex-end;
+    height: 100%;
+  }
+
+  &__fill {
+    width: 100%;
+    border-radius: 6px 6px 0 0;
+    background: linear-gradient(180deg, $orange-400, $orange-600);
+    transition: height 0.5s ease;
+
+    &.is-empty {
+      background: $line;
+    }
+  }
+
+  &__label {
+    font-size: 0.76rem;
+    color: $mute;
+  }
+
+  &__footer {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid $line;
+    font-size: 0.87rem;
+    color: $mute;
+
+    b {
+      color: $blue-deep;
+      font-weight: 700;
+    }
+  }
+}
+
+// Réserve la place du chiffre au-dessus des barres vides
+.bars__col:has(.bars__fill.is-empty) .bars__val {
+  visibility: hidden;
+}
+
+// ===== BARRES HORIZONTALES (parc / top marques) =====
+.parc {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+  }
+
+  &__marque {
+    font-size: 0.89rem;
+    font-weight: 600;
+    color: $text;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__track {
+    height: 9px;
+    border-radius: 99px;
+    background: $sky-soft;
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    border-radius: 99px;
+    background: $line-strong;
+    transition: width 0.5s ease;
+
+    &.is-covered {
+      background: linear-gradient(90deg, $navy, $navy-400);
+    }
+  }
+
+  &__nb {
+    min-width: 26px;
+    text-align: right;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  // « aucune piece » signale une opportunite commerciale :
+  // une marque presente chez les clients mais absente du stock
+  &__tag {
+    min-width: 96px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    background: rgba($orange, 0.14);
+    color: $orange-800;
+    font-size: 0.76rem;
+    font-weight: 600;
+    text-align: center;
+
+    &.is-covered {
+      background: rgba($green, 0.12);
+      color: $green;
+    }
+  }
+}
+
+// ===== DERNIERS AJOUTS =====
+.recent {
+  width: 100%;
+  border-collapse: collapse;
+
+  td {
+    padding: 11px 12px;
+    border-bottom: 1px solid $line;
+    font-size: 0.91rem;
+    vertical-align: middle;
+  }
+
+  tr:last-child td {
+    border-bottom: 0;
+  }
+
+  strong {
+    font-weight: 600;
+    display: block;
+  }
+
+  &__img {
+    width: 58px;
+    padding-left: 0;
+
+    img {
+      width: 46px;
+      height: 46px;
+      border-radius: $r-sm;
+      object-fit: cover;
+      background: $sky-soft;
+      display: block;
+    }
+  }
+
+  &__sub {
+    font-size: 0.8rem;
+    color: $mute;
+  }
+
+  &__cat {
+    color: $dim;
+    text-transform: capitalize;
+  }
+
+  &__date {
+    color: $mute;
+    font-size: 0.85rem;
+    padding-right: 0;
+  }
+}
+
+.tag {
+  display: inline-block;
+  padding: 3px 11px;
+  border-radius: 99px;
+  background: $sky;
+  color: $navy;
+  font-size: 0.79rem;
+  font-weight: 600;
+}
+
+// ===== ÉTATS =====
+.vide {
+  margin: 0;
+  padding: 24px 0;
+  text-align: center;
+  color: $mute;
+  font-size: 0.9rem;
+}
+
+.loader {
+  display: grid;
+  place-items: center;
+  gap: 16px;
+  min-height: 60vh;
+  color: $mute;
+
+  &__spin {
+    width: 34px;
+    height: 34px;
+    border: 3px solid $line;
+    border-top-color: $orange;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+:focus-visible {
+  outline: 2px solid $orange;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+// ===== BADGE DE NAVIGATION =====
+.nav-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 99px;
+  background: $orange;
+  color: $navy-900;
+  font-size: 0.74rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+// ===== TUILE CLIQUABLE =====
+.kpi--lien {
+  display: block;
+  text-decoration: none;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba($orange, 0.4);
+    box-shadow: $shadow-md;
+  }
+}
+
+// ===== ALERTE COMMANDES =====
+.alert--green {
+  background: rgba($green, 0.08);
+  border-color: rgba($green, 0.32);
+
+  strong {
+    color: $green;
+  }
+}
+
+// ===== STATUT DE COMMANDE =====
+.statut {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+
+  // En attente : orange, c'est ce qui demande une action
+  &.is-en_attente {
+    background: rgba($orange, 0.15);
+    color: $orange-800;
+  }
+  &.is-confirmee {
+    background: rgba($navy, 0.1);
+    color: $navy;
+  }
+  &.is-livree {
+    background: rgba($green, 0.12);
+    color: $green;
+  }
+  &.is-annulee {
+    background: #eef2f9;
+    color: $mute;
+  }
+}
+
+// Colonne référence dans le tableau des commandes
+.recent__ref {
+  font-weight: 800;
+  color: $orange-700;
+  white-space: nowrap;
+  padding-left: 0;
+}
+
+// ===== TABLETTE =====
+@media (max-width: 1100px) {
+  .hero-grid,
+  .charts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .alerts {
+    grid-auto-flow: row;
+  }
+
+  .donut-row {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .legend {
+    width: 100%;
+  }
+}
+
+// ===== MOBILE =====
+@media (max-width: 767px) {
+  .page {
+    padding: 16px 14px 48px;
+  }
+
+  .entete {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 14px;
+
+    .logo {
+      height: 40px;
+    }
+
+    &__title h1 {
+      font-size: 1.2rem;
+    }
+
+    &__title p {
+      display: none;
+    }
+
+    &__nav {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+
+  .hero {
+    padding: 20px;
+
+    &__value {
+      font-size: 2rem;
+    }
+  }
+
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .recent__ref {
+    font-size: 0.82rem;
+  }
+
+  .kpi {
+    padding: 14px;
+
+    &__value {
+      font-size: 1.5rem;
+    }
+  }
+
+  .card {
+    padding: 18px 16px;
+  }
+
+  .bars {
+    height: 140px;
+    gap: 3px;
+
+    &__label {
+      font-size: 0.65rem;
+    }
+
+    &__val {
+      font-size: 0.68rem;
+    }
+  }
+
+  .parc li {
+    grid-template-columns: 84px minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .parc__tag {
+    grid-column: 1 / -1;
+    justify-self: start;
+    min-width: 0;
+  }
+
+  .recent {
+    &__cat,
+    &__etat,
+    &__date {
+      display: none;
+    }
+  }
+}
+
+/* =========================================================
+   COMPTE GESTIONNAIRE (en-tete)
+========================================================= */
+.gestionnaire {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 18px;
+  margin-left: 4px;
+  border-left: 1px solid $line;
+
+  &__pastille {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, $navy-800, $navy-600);
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+
+  &__identite {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    min-width: 0;
+
+    b {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: $blue-deep;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 150px;
+    }
+
+    em {
+      font-style: normal;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: $orange-700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+  }
+
+  &__quitter {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 14px;
+    border: 1px solid $line;
+    border-radius: 99px;
+    background: #fff;
+    color: $dim;
+    font-family: inherit;
+    font-size: 0.86rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+
+    svg {
+      width: 15px;
+      height: 15px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    &:hover {
+      border-color: $red;
+      background: rgba($red, 0.06);
+      color: $red;
+    }
+  }
+}
+
+/* Tablette : le libelle du bouton cede la place */
+@media (max-width: 1100px) {
+  .gestionnaire {
+    padding-left: 12px;
+    gap: 9px;
+
+    &__quitter span {
+      display: none;
+    }
+
+    &__quitter {
+      padding: 9px;
+    }
+  }
+}
+
+/* Mobile : identite masquee, la pastille suffit */
+@media (max-width: 767px) {
+  .gestionnaire {
+    padding-left: 0;
+    border-left: 0;
+    margin-left: auto;
+
+    &__identite {
+      display: none;
+    }
+  }
+}

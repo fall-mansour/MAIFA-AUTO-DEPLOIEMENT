@@ -1,0 +1,997 @@
+// ============================================================
+//  MAIFA-AUTO — GESTION DES COMMANDES
+//  Palette du logo : bleu nuit #12314B + orange #F2762E
+//
+//  Repartition propre aux pages de gestion : le bleu nuit
+//  structure, l'orange signale ce qui attend une action.
+//  Ici, l'action decisive « Confirmer et destocker » reste en
+//  VERT : c'est une validation, pas une simple mise en avant,
+//  et elle doit se distinguer au premier coup d'oeil de
+//  l'annulation en rouge.
+// ============================================================
+
+// -- Bleu nuit : structure, titres, fonds --
+$navy-900: #081724;
+$navy-800: #0b1f30;
+$navy: #12314b; // couleur exacte du logo
+$navy-600: #1b4a6f;
+$navy-400: #3f80b0;
+
+// -- Orange : commandes en attente, references --
+// Le blanc sur orange ne donne que 2.84:1, insuffisant pour du petit
+// texte. $orange-700 est lisible en TEXTE sur blanc, $orange-800 sur
+// aplat orange clair.
+$orange-800: #a8480f;
+$orange-700: #c25317;
+$orange-600: #d9631f;
+$orange: #f2762e; // couleur exacte du logo
+$orange-400: #ff9052;
+$orange-50: #fff4ed;
+
+// -- Alias conserves, pour ne rien casser dans le fichier --
+$blue: $navy;
+$blue-hi: $navy-600;
+$blue-deep: $navy-800;
+$sky: #e7eef5;
+$sky-soft: #f4f7fa;
+
+$page: #f6f8fb;
+$card: #ffffff;
+$line: #dfe5ee;
+$line-strong: #c3cddb;
+
+$text: $navy;
+$dim: #435a76;
+
+// Nuances calees sur le seuil de lisibilite AA (4.5:1 sur blanc) :
+// le gris clair habituel n'atteignait que 2.8:1
+$mute: #647489;
+$mute-light: #8d9bb0; // bordures et icones uniquement, jamais du texte
+
+$green: #077f55;
+$green-vif: #0ba06a;
+$amber: #9e5f08;
+$red: #cc1f1f;
+
+$shadow-sm:
+  0 1px 2px rgba($navy, 0.06),
+  0 4px 14px rgba($navy, 0.07);
+$shadow-md: 0 10px 30px rgba($navy, 0.12);
+$shadow-orange: 0 6px 20px rgba($orange, 0.38);
+
+$r-sm: 10px;
+$r-md: 14px;
+$r-lg: 20px;
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: $page;
+  color: $text;
+  font-family: 'Barlow', 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+.mono {
+  font-variant-numeric: tabular-nums;
+}
+
+.page {
+  max-width: 1340px;
+  margin: 0 auto;
+  padding: 24px 24px 64px;
+}
+
+// ===== BARRE HAUTE =====
+.entete {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 24px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid $line;
+
+  // Logo horizontal en PNG transparent : ni pastille ni bordure
+  .logo {
+    height: 44px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  &__title {
+    flex: 1;
+    min-width: 0;
+
+    h1 {
+      margin: 0;
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: $blue-deep;
+    }
+
+    p {
+      margin: 1px 0 0;
+      font-size: 0.86rem;
+      color: $mute;
+    }
+  }
+
+  &__nav {
+    display: flex;
+    gap: 18px;
+
+    a {
+      color: $dim;
+      font-size: 0.93rem;
+      font-weight: 600;
+      text-decoration: none;
+
+      &:hover {
+        color: $orange-700;
+      }
+    }
+  }
+}
+
+// ===== CHIFFRES =====
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.kpi {
+  padding: 16px 18px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-md;
+  box-shadow: $shadow-sm;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    transform 0.18s ease;
+
+  &__label {
+    display: block;
+    font-size: 0.85rem;
+    color: $mute;
+  }
+
+  &__value {
+    display: block;
+    margin: 2px 0;
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: $blue-deep;
+
+    em {
+      font-style: normal;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: $mute;
+      margin-left: 5px;
+    }
+  }
+
+  &__hint {
+    font-size: 0.82rem;
+    color: $mute;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &.is-active {
+    border-color: $orange;
+    box-shadow: 0 0 0 3px rgba($orange, 0.18);
+  }
+
+  // En attente : l'orange signale ce qui demande une action
+  &--attente {
+    border-color: rgba($orange, 0.42);
+    background: $orange-50;
+
+    .kpi__value {
+      color: $orange-800;
+    }
+  }
+
+  // Chiffre d'affaires : le chiffre cle de la page
+  &--ca {
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+    background: linear-gradient(135deg, $navy-900, $navy 55%, $navy-600);
+    border-color: transparent;
+
+    // Halo orange, comme sur le bloc phare du tableau de bord
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 88% 85%, rgba($orange, 0.26) 0%, transparent 58%);
+      pointer-events: none;
+    }
+
+    > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .kpi__label,
+    .kpi__hint {
+      color: rgba(255, 255, 255, 0.82);
+    }
+    .kpi__value {
+      color: #fff;
+      font-size: 1.5rem;
+    }
+    .kpi__value em {
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+// ===== BARRE DE FILTRES =====
+.barre {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.onglets {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: #fff;
+  border: 1px solid $line;
+  border-radius: 99px;
+
+  button {
+    padding: 8px 18px;
+    border: 0;
+    border-radius: 99px;
+    background: transparent;
+    color: $dim;
+    font-family: inherit;
+    font-size: 0.89rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+
+    &:hover {
+      color: $orange-700;
+    }
+
+    &.is-active {
+      background: linear-gradient(135deg, $navy-800, $navy-600);
+      color: #fff;
+    }
+  }
+}
+
+.recherche {
+  position: relative;
+  flex: 1;
+  max-width: 320px;
+
+  svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: $mute;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  input {
+    width: 100%;
+    padding: 11px 14px 11px 40px;
+    border: 1px solid $line;
+    border-radius: 99px;
+    background: #fff;
+    color: $text;
+    font-family: inherit;
+    font-size: 0.92rem;
+    outline: none;
+
+    &::placeholder {
+      color: $mute;
+    }
+
+    &:focus {
+      border-color: $orange;
+      box-shadow: 0 0 0 4px rgba($orange, 0.15);
+    }
+  }
+}
+
+// ===== COMMANDES =====
+.cmd {
+  margin-bottom: 12px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-md;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+
+  &.is-ouverte {
+    border-color: $line-strong;
+    box-shadow: $shadow-md;
+  }
+
+  // Stock insuffisant : la confirmation echouera
+  &.is-bloquee {
+    border-left: 3px solid $orange;
+  }
+
+  &__head {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr) auto auto 110px 110px 20px;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 14px 18px;
+    border: 0;
+    background: transparent;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+      background: $sky-soft;
+    }
+  }
+
+  // La reference identifie la commande d'un coup d'oeil
+  &__ref {
+    strong {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: $orange-700;
+    }
+  }
+
+  &__date {
+    font-size: 0.79rem;
+    color: $mute;
+  }
+
+  &__client {
+    min-width: 0;
+
+    strong {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    span {
+      font-size: 0.82rem;
+      color: $mute;
+    }
+  }
+
+  &__montant {
+    text-align: right;
+
+    strong {
+      display: block;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: $blue-deep;
+    }
+
+    span {
+      font-size: 0.78rem;
+      color: $mute;
+    }
+  }
+
+  &__chevron {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: $mute;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    transition: transform 0.2s ease;
+  }
+
+  &.is-ouverte &__chevron {
+    transform: rotate(180deg);
+  }
+
+  &__alerte {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 18px;
+    background: $orange-50;
+    border-top: 1px solid rgba($orange, 0.32);
+    font-size: 0.85rem;
+    color: $orange-800;
+
+    svg {
+      flex-shrink: 0;
+      width: 17px;
+      height: 17px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+    }
+  }
+
+  &__corps {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 20px;
+    padding: 18px;
+    border-top: 1px solid $line;
+    background: $sky-soft;
+  }
+
+  &__livraison {
+    dl {
+      margin: 0 0 16px;
+
+      > div {
+        padding: 6px 0;
+        border-bottom: 1px solid $line;
+
+        &:last-child {
+          border-bottom: 0;
+        }
+      }
+
+      dt {
+        font-size: 0.79rem;
+        color: $mute;
+      }
+
+      dd {
+        margin: 2px 0 0;
+        font-size: 0.89rem;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// Étiquettes
+.tag-compte,
+.tag-paiement {
+  padding: 4px 11px;
+  border-radius: 99px;
+  font-size: 0.77rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tag-compte {
+  background: rgba($green, 0.12);
+  color: $green;
+
+  &.is-invite {
+    background: #eef2f9;
+    color: $dim;
+  }
+}
+
+.tag-paiement {
+  background: $sky;
+  color: $navy;
+}
+
+.statut {
+  padding: 5px 12px;
+  border-radius: 99px;
+  font-size: 0.79rem;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+
+  // En attente : orange, c'est ce qui appelle une action
+  &.is-en_attente {
+    background: rgba($orange, 0.15);
+    color: $orange-800;
+  }
+  &.is-confirmee {
+    background: rgba($navy, 0.1);
+    color: $navy;
+  }
+  &.is-livree {
+    background: rgba($green, 0.12);
+    color: $green;
+  }
+  &.is-annulee {
+    background: #eef2f9;
+    color: $mute;
+  }
+}
+
+// ===== ARTICLES =====
+.art {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 8px;
+  background: #fff;
+  border: 1px solid $line;
+  border-radius: $r-sm;
+
+  img {
+    width: 54px;
+    height: 54px;
+    border-radius: $r-sm;
+    object-fit: cover;
+    background: $sky-soft;
+  }
+
+  &__infos {
+    min-width: 0;
+
+    strong {
+      display: block;
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    span {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    em {
+      font-style: normal;
+      font-size: 0.79rem;
+      color: $mute;
+    }
+  }
+
+  &__stock {
+    display: inline-block !important;
+    margin-top: 3px;
+    font-size: 0.78rem;
+    color: $green;
+    font-weight: 600;
+
+    &.is-court {
+      color: $red;
+    }
+  }
+
+  &__prix {
+    text-align: right;
+    white-space: nowrap;
+
+    span {
+      display: block;
+      font-size: 0.78rem;
+      color: $mute;
+    }
+
+    strong {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: $navy-800;
+    }
+  }
+}
+
+// ===== ACTIONS =====
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn {
+  padding: 11px 16px;
+  border: 1px solid transparent;
+  border-radius: 99px;
+  font-family: inherit;
+  font-size: 0.91rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+
+  // Confirmer reste VERT : c'est une validation qui engage le stock,
+  // elle doit trancher avec l'annulation en rouge
+  &--valider {
+    background: linear-gradient(135deg, $green, $green-vif);
+    color: #fff;
+    box-shadow: 0 5px 16px rgba($green, 0.32);
+  }
+
+  &--livrer {
+    background: linear-gradient(135deg, $navy-800, $navy-600);
+    color: #fff;
+    box-shadow: 0 5px 16px rgba($navy, 0.3);
+  }
+
+  &--annuler {
+    background: #fff;
+    border-color: rgba($red, 0.4);
+    color: $red;
+
+    &:hover:not(:disabled) {
+      background: $red;
+      color: #fff;
+      border-color: $red;
+    }
+  }
+
+  &--tel {
+    background: #fff;
+    border-color: $line-strong;
+    color: $dim;
+
+    &:hover {
+      border-color: $orange;
+      color: $orange-700;
+    }
+  }
+}
+
+// ===== ÉTATS =====
+.erreur {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-radius: $r-md;
+  background: rgba($red, 0.07);
+  border: 1px solid rgba($red, 0.3);
+  color: $red;
+  font-size: 0.89rem;
+}
+
+.vide {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  padding: 70px 24px;
+  background: $card;
+  border: 1px dashed $line-strong;
+  border-radius: $r-lg;
+  text-align: center;
+
+  svg {
+    width: 44px;
+    height: 44px;
+    fill: none;
+    stroke: $mute-light;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  h2 {
+    margin: 4px 0 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: $navy-800;
+  }
+
+  p {
+    margin: 0;
+    color: $mute;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid $orange;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// ===== TABLETTE =====
+@media (max-width: 1100px) {
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cmd__head {
+    grid-template-columns: 130px minmax(0, 1fr) auto 20px;
+
+    .tag-paiement,
+    .cmd__montant {
+      display: none;
+    }
+  }
+
+  .cmd__corps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+// ===== MOBILE =====
+@media (max-width: 767px) {
+  .page {
+    padding: 16px 14px 48px;
+  }
+
+  .entete {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 14px;
+
+    .logo {
+      height: 38px;
+    }
+    &__title h1 {
+      font-size: 1.2rem;
+    }
+    &__title p {
+      display: none;
+    }
+    &__nav {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+
+  .kpis {
+    gap: 10px;
+  }
+  .kpi {
+    padding: 12px 14px;
+    &__value {
+      font-size: 1.4rem;
+    }
+  }
+
+  .onglets {
+    width: 100%;
+    overflow-x: auto;
+
+    button {
+      white-space: nowrap;
+    }
+  }
+
+  .recherche {
+    max-width: 100%;
+  }
+
+  .cmd__head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+
+    .tag-compte {
+      display: none;
+    }
+  }
+
+  .art {
+    grid-template-columns: 44px minmax(0, 1fr);
+    img {
+      width: 44px;
+      height: 44px;
+    }
+    &__prix {
+      grid-column: 2;
+      text-align: left;
+    }
+  }
+}
+
+// ===== FRAICHEUR DES DONNEES =====
+.maj {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &__bouton {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid $line;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.18s ease;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: $dim;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform 0.3s ease;
+    }
+
+    &:hover {
+      border-color: $orange;
+      background: $orange-50;
+
+      svg {
+        stroke: $orange-700;
+        transform: rotate(-45deg);
+      }
+    }
+
+    // Actualisation en cours : rotation continue
+    &.is-actif svg {
+      animation: tourner 0.9s linear infinite;
+      stroke: $orange;
+    }
+  }
+
+  // Compteur de nouveautes, sur le bouton
+  &__pastille {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 99px;
+    background: $orange;
+    color: $navy-900;
+    font-size: 0.68rem;
+    font-weight: 800;
+    line-height: 18px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__texte {
+    font-size: 0.78rem;
+    color: $mute;
+    white-space: nowrap;
+  }
+}
+
+@keyframes tourner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ===== BANDEAU DES NOUVELLES COMMANDES =====
+.nouvelles-cmd {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 13px 18px;
+  margin-bottom: 16px;
+  border-radius: $r-md;
+  background: $orange-50;
+  border: 1px solid rgba($orange, 0.4);
+  color: $orange-800;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  animation: apparitionCmd 0.35s ease;
+
+  svg {
+    flex-shrink: 0;
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    // Petite sonnerie visuelle a l'apparition
+    animation: sonner 1s ease 0.2s 2;
+  }
+
+  &:hover {
+    background: rgba($orange, 0.16);
+  }
+}
+
+@keyframes apparitionCmd {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sonner {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  20% {
+    transform: rotate(-12deg);
+  }
+  40% {
+    transform: rotate(10deg);
+  }
+  60% {
+    transform: rotate(-6deg);
+  }
+  80% {
+    transform: rotate(4deg);
+  }
+}
+
+// ===== COMMANDE ARRIVEE PENDANT LA CONSULTATION =====
+.cmd.is-nouvelle {
+  border-color: rgba($orange, 0.55);
+  box-shadow:
+    0 0 0 3px rgba($orange, 0.12),
+    $shadow-sm;
+  animation: surlignerCmd 2.4s ease;
+}
+
+@keyframes surlignerCmd {
+  0% {
+    background: rgba($orange, 0.16);
+  }
+  100% {
+    background: $card;
+  }
+}
+
+@media (max-width: 767px) {
+  .maj__texte {
+    display: none;
+  }
+}

@@ -1,0 +1,451 @@
+<!-- ================= BARRE HAUTE ================= -->
+<header class="entete">
+  <img src="/assets/logo-horizontal.png" alt="MAIFA-AUTO" class="logo" />
+
+  <div class="entete__titre">
+    <h1>Import / Export</h1>
+    <p>Ajouter ou modifier plusieurs pièces à partir d'un fichier Excel.</p>
+  </div>
+
+  <nav class="entete__nav">
+    <a routerLink="/Dashboard">Tableau de bord</a>
+    <a routerLink="/stock">Stock</a>
+    <a routerLink="/ajoutpieces">Ajouter une pièce</a>
+    <a routerLink="/commandes">Commandes</a>
+  </nav>
+</header>
+
+<div class="page">
+  <!-- ================= FIL DES ÉTAPES ================= -->
+  <ol class="fil">
+    <li [class.is-active]="etape === 'depot'" [class.is-faite]="etape !== 'depot'">
+      <span>1</span>Choisir le fichier
+    </li>
+    <li [class.is-active]="etape === 'apercu'" [class.is-faite]="etape === 'rapport'">
+      <span>2</span>Vérifier
+    </li>
+    <li [class.is-active]="etape === 'rapport'"><span>3</span>Appliquer</li>
+  </ol>
+
+  <!-- ================= MESSAGE D'ERREUR ================= -->
+  <div class="alerte alerte--erreur" *ngIf="messageErreur">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v6m0 3.5h.01" />
+    </svg>
+    <p>{{ messageErreur }}</p>
+  </div>
+
+  <div class="alerte alerte--erreur" *ngIf="anomaliesFichier.length">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"
+      />
+    </svg>
+    <div>
+      <strong>Le fichier pose problème</strong>
+      <ul>
+        <li *ngFor="let a of anomaliesFichier">{{ a.texte || a.message }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ÉTAPE 1 — DÉPÔT
+  ============================================================ -->
+  <section *ngIf="etape === 'depot'" class="grille-depot">
+    <!-- Zone de dépôt -->
+    <div class="carte carte--depot">
+      <h2>Importer un fichier</h2>
+      <p class="carte__intro">
+        Le fichier doit comporter deux onglets : <strong>Pièces</strong> et
+        <strong>Compatibilités</strong>. Rien ne sera écrit au stock avant que vous ayez vu le
+        détail de ce qui va se passer.
+      </p>
+
+      <div
+        class="depot"
+        [class.is-survol]="survol"
+        [class.is-rempli]="fichier"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+      >
+        <input
+          type="file"
+          accept=".xlsx"
+          aria-label="Fichier Excel à importer"
+          (change)="onFichierChoisi($event)"
+        />
+
+        <div class="depot__vide" *ngIf="!fichier">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5-5 5 5M12 5v12" />
+          </svg>
+          <strong>Glissez votre fichier ici</strong>
+          <span>ou cliquez pour le choisir. Format .xlsx, 10 Mo maximum.</span>
+        </div>
+
+        <div class="depot__fichier" *ngIf="fichier">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <path d="M14 2v6h6" />
+          </svg>
+          <div>
+            <strong>{{ fichier.name }}</strong>
+            <span>{{ tailleFichier }}</span>
+          </div>
+          <button type="button" (click)="retirerFichier()" aria-label="Retirer le fichier">
+            Retirer
+          </button>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn--principal"
+        [disabled]="!fichier || enCours"
+        (click)="analyser()"
+      >
+        {{ enCours ? 'Analyse en cours…' : 'Analyser le fichier' }}
+      </button>
+    </div>
+
+    <!-- Colonne d'aide -->
+    <aside class="colonne-aide">
+      <div class="carte">
+        <h2>Première fois ?</h2>
+        <p class="carte__intro">
+          Partez du modèle. Il contient vos marques et vos catégories réelles, et deux lignes
+          d'exemple à remplacer.
+        </p>
+        <button
+          type="button"
+          class="btn btn--secondaire"
+          [disabled]="enCours"
+          (click)="telechargerModele()"
+        >
+          Télécharger le modèle
+        </button>
+      </div>
+
+      <div class="carte">
+        <h2>Modifier le stock existant</h2>
+        <p class="carte__intro">
+          Exportez votre stock, changez ce que vous voulez dans Excel, puis réimportez le fichier
+          ici. Les pièces sont reconnues par leur référence interne.
+        </p>
+        <button
+          type="button"
+          class="btn btn--secondaire"
+          [disabled]="enCours"
+          (click)="exporterStock()"
+        >
+          Exporter le stock
+        </button>
+      </div>
+
+      <div class="carte carte--note">
+        <h3>Bon à savoir</h3>
+        <ul>
+          <li>Référence interne <strong>vide</strong> : la pièce est créée.</li>
+          <li>Référence interne <strong>remplie</strong> : la pièce est mise à jour.</li>
+          <li>Une cellule vide en mise à jour ne supprime rien.</li>
+          <li>Une pièce sans photo entre en brouillon, invisible au catalogue.</li>
+        </ul>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ============================================================
+       ÉTAPE 2 — APERÇU
+  ============================================================ -->
+  <section *ngIf="etape === 'apercu' && synthese">
+    <div class="bandeau">
+      <div class="bandeau__fichier">
+        <strong>{{ nomFichier }}</strong>
+        <span>analysé, rien n'est encore écrit</span>
+      </div>
+      <button type="button" class="lien-discret" (click)="abandonner()">
+        Abandonner cet import
+      </button>
+    </div>
+
+    <!-- Chiffres -->
+    <div class="chiffres">
+      <div class="chiffre">
+        <span class="chiffre__valeur mono">{{ synthese.pieces.creations }}</span>
+        <span class="chiffre__label"
+          >pièce{{ synthese.pieces.creations > 1 ? 's' : '' }} à créer</span
+        >
+      </div>
+      <div class="chiffre">
+        <span class="chiffre__valeur mono">{{ synthese.pieces.mises_a_jour }}</span>
+        <span class="chiffre__label">à mettre à jour</span>
+      </div>
+      <div class="chiffre">
+        <span class="chiffre__valeur mono">{{
+          synthese.compatibilites.pretes + synthese.compatibilites.a_confirmer
+        }}</span>
+        <span class="chiffre__label"
+          >véhicule{{
+            synthese.compatibilites.pretes + synthese.compatibilites.a_confirmer > 1 ? 's' : ''
+          }}
+          rattaché{{
+            synthese.compatibilites.pretes + synthese.compatibilites.a_confirmer > 1 ? 's' : ''
+          }}</span
+        >
+      </div>
+      <div class="chiffre chiffre--alerte" *ngIf="nbAnomalies > 0">
+        <span class="chiffre__valeur mono">{{ nbAnomalies }}</span>
+        <span class="chiffre__label">ligne{{ nbAnomalies > 1 ? 's' : '' }} en anomalie</span>
+      </div>
+    </div>
+
+    <!-- Avertissement brouillons -->
+    <div class="alerte alerte--info" *ngIf="synthese.pieces.brouillons > 0">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M4 16.5V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1.5Zm0 0 4.6-4.3a1.5 1.5 0 0 1 2 0L14 15"
+        />
+      </svg>
+      <p>
+        <strong
+          >{{ synthese.pieces.brouillons }} pièce{{
+            synthese.pieces.brouillons > 1 ? 's' : ''
+          }}
+          sans photo</strong
+        >
+        entrera{{ synthese.pieces.brouillons > 1 ? 'ont' : '' }} en brouillon. Elles seront au stock
+        mais n'apparaîtront dans aucun catalogue tant qu'une photo ne leur sera pas ajoutée.
+      </p>
+    </div>
+
+    <!-- Filtres -->
+    <div class="onglets">
+      <button
+        type="button"
+        [class.is-actif]="filtre === 'a_corriger'"
+        (click)="filtre = 'a_corriger'"
+      >
+        À corriger
+        <em *ngIf="nbACorriger > 0">{{ nbACorriger }}</em>
+      </button>
+      <button type="button" [class.is-actif]="filtre === 'tous'" (click)="filtre = 'tous'">
+        Toutes les lignes ({{ lignes.length }})
+      </button>
+      <button type="button" [class.is-actif]="filtre === 'pieces'" (click)="filtre = 'pieces'">
+        Pièces ({{ synthese.pieces.total }})
+      </button>
+      <button
+        type="button"
+        [class.is-actif]="filtre === 'compatibilites'"
+        (click)="filtre = 'compatibilites'"
+      >
+        Compatibilités ({{ synthese.compatibilites.total }})
+      </button>
+    </div>
+
+    <!-- Tableau des lignes -->
+    <div class="lignes" *ngIf="lignesAffichees.length; else aucuneLigne">
+      <article
+        class="ligne"
+        *ngFor="let l of lignesAffichees; trackBy: trackLigne"
+        [ngClass]="'est-' + l.statut"
+      >
+        <div class="ligne__tete">
+          <span class="pastille" [ngClass]="'pastille--' + l.statut" aria-hidden="true"></span>
+
+          <span class="ligne__num mono">L{{ l.ligne_fichier }}</span>
+
+          <div class="ligne__objet">
+            <strong>{{ libelle(l) }}</strong>
+            <span class="mono" *ngIf="referenceLigne(l)">{{ referenceLigne(l) }}</span>
+          </div>
+
+          <span class="etiquette">{{ etiquetteAction(l) }}</span>
+
+          <span class="ligne__statut">
+            <ng-container [ngSwitch]="l.statut">
+              <span *ngSwitchCase="'pret'">prêt</span>
+              <span *ngSwitchCase="'a_confirmer'">à confirmer</span>
+              <span *ngSwitchCase="'anomalie'">anomalie</span>
+              <span *ngSwitchCase="'ignoree'">écartée</span>
+            </ng-container>
+          </span>
+
+          <button
+            type="button"
+            class="btn-ecarter"
+            *ngIf="l.statut !== 'ignoree'"
+            [disabled]="enCours"
+            (click)="ignorerLigne(l)"
+          >
+            Écarter
+          </button>
+        </div>
+
+        <!-- Motifs -->
+        <ul class="motifs" *ngIf="l.messages?.length">
+          <li *ngFor="let m of l.messages" [ngClass]="'motif--' + m.gravite">
+            {{ m.texte }}
+          </li>
+        </ul>
+
+        <!-- Correction du véhicule -->
+        <div class="correction" *ngIf="attendModele(l) && l.statut !== 'ignoree'">
+          <!-- Cas 1 : le serveur propose des candidats -->
+          <div class="correction__champ" *ngIf="candidats(l).length">
+            <label [attr.for]="'cand-' + l.id">Quel modèle ?</label>
+            <select
+              [id]="'cand-' + l.id"
+              [disabled]="enCours"
+              (change)="choisirModele(l, $any($event.target).value)"
+            >
+              <option value="">Choisir…</option>
+              <option *ngFor="let c of candidats(l)" [value]="c.id">{{ c.modele }}</option>
+            </select>
+          </div>
+
+          <!-- Cas 2 : rien de proposé, on choisit dans le référentiel -->
+          <ng-container *ngIf="!candidats(l).length">
+            <div class="correction__champ">
+              <label [attr.for]="'marque-' + l.id">Marque</label>
+              <select
+                [id]="'marque-' + l.id"
+                [disabled]="enCours"
+                (change)="onMarqueChoisie(l, $any($event.target).value)"
+              >
+                <option value="">Choisir une marque…</option>
+                <option *ngFor="let m of marques" [value]="m.id">{{ m.nom }}</option>
+              </select>
+            </div>
+
+            <div class="correction__champ">
+              <label [attr.for]="'modele-' + l.id">Modèle</label>
+              <select
+                [id]="'modele-' + l.id"
+                [disabled]="enCours || !modelesDisponibles(l).length"
+                (change)="choisirModele(l, $any($event.target).value)"
+              >
+                <option value="">
+                  {{
+                    modelesDisponibles(l).length
+                      ? 'Choisir un modèle…'
+                      : 'Choisissez d abord une marque'
+                  }}
+                </option>
+                <option *ngFor="let mo of modelesDisponibles(l)" [value]="mo.id">
+                  {{ mo.modele }}
+                </option>
+              </select>
+            </div>
+          </ng-container>
+        </div>
+      </article>
+    </div>
+
+    <ng-template #aucuneLigne>
+      <div class="vide">
+        <p>Aucune ligne dans cette vue.</p>
+      </div>
+    </ng-template>
+
+    <!-- Barre d'action -->
+    <div class="barre-action">
+      <div class="barre-action__texte">
+        <strong>{{ nbApplicables }} ligne{{ nbApplicables > 1 ? 's' : '' }}</strong>
+        ser{{ nbApplicables > 1 ? 'ont' : 'a' }} appliquée{{ nbApplicables > 1 ? 's' : '' }}.
+        <span *ngIf="nbAnomalies > 0">
+          {{ nbAnomalies }} en anomalie {{ nbAnomalies > 1 ? 'seront ignorées' : 'sera ignorée' }}.
+        </span>
+      </div>
+      <button
+        type="button"
+        class="btn btn--principal"
+        [disabled]="enCours || nbApplicables === 0"
+        (click)="appliquer()"
+      >
+        {{ enCours ? 'Application…' : 'Appliquer au stock' }}
+      </button>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ÉTAPE 3 — RAPPORT
+  ============================================================ -->
+  <section *ngIf="etape === 'rapport' && rapport" class="rapport">
+    <div class="carte carte--succes">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" />
+        <path d="m8.5 12.5 2.5 2.5 4.5-5" />
+      </svg>
+      <h2>Import terminé</h2>
+      <p>
+        {{ rapport.pieces_creees }} pièce{{ rapport.pieces_creees > 1 ? 's' : '' }} créée{{
+          rapport.pieces_creees > 1 ? 's' : ''
+        }}, {{ rapport.pieces_mises_a_jour }} mise{{ rapport.pieces_mises_a_jour > 1 ? 's' : '' }} à
+        jour, {{ rapport.compatibilites_ajoutees }} véhicule{{
+          rapport.compatibilites_ajoutees > 1 ? 's' : ''
+        }}
+        rattaché{{ rapport.compatibilites_ajoutees > 1 ? 's' : '' }}.
+      </p>
+    </div>
+
+    <!-- Références attribuées -->
+    <div class="carte" *ngIf="rapport.references_attribuees?.length">
+      <h2>Références attribuées</h2>
+      <p class="carte__intro">Ces références sont définitives. Notez-les sur vos étagères.</p>
+      <table class="tableau">
+        <thead>
+          <tr>
+            <th>Référence</th>
+            <th>Désignation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of rapport.references_attribuees">
+            <td class="mono">{{ r.ref_interne }}</td>
+            <td>{{ r.description }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Brouillons -->
+    <div class="alerte alerte--info" *ngIf="rapport.brouillons > 0">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M4 16.5V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1.5Zm0 0 4.6-4.3a1.5 1.5 0 0 1 2 0L14 15"
+        />
+      </svg>
+      <p>
+        <strong
+          >{{ rapport.brouillons }} pièce{{ rapport.brouillons > 1 ? 's' : '' }} en
+          brouillon.</strong
+        >
+        Ajoutez-leur une photo depuis le stock pour qu'elles apparaissent au catalogue.
+      </p>
+    </div>
+
+    <!-- Lignes non appliquées -->
+    <div class="carte" *ngIf="rapport.non_appliquees?.length">
+      <h2>Lignes non appliquées</h2>
+      <ul class="liste-simple">
+        <li *ngFor="let n of rapport.non_appliquees">
+          <span class="mono"
+            >{{ n.onglet === 'pieces' ? 'Pièces' : 'Compatibilités' }} L{{ n.ligne }}</span
+          >
+          {{ n.motif }}
+        </li>
+      </ul>
+    </div>
+
+    <div class="rapport__actions">
+      <a class="btn btn--secondaire" routerLink="/stock">Voir le stock</a>
+      <button type="button" class="btn btn--principal" (click)="recommencer()">
+        Importer un autre fichier
+      </button>
+    </div>
+  </section>
+</div>

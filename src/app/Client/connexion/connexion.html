@@ -1,0 +1,173 @@
+<div class="auth">
+  <!-- ================= PANNEAU DE MARQUE ================= -->
+  <!-- Masqué sur mobile : sur un petit écran, seul le formulaire compte -->
+  <aside class="vitrine">
+    <div class="vitrine__contenu">
+      <img src="/assets/logo-horizontal-blanc.png" alt="MAIFA-AUTO" class="vitrine__logo" />
+
+      <h2>La pièce qu'il vous faut, au bon prix</h2>
+      <p class="vitrine__accroche">
+        Pièces neuves et d'occasion pour tous les véhicules, avec compatibilité vérifiée.
+      </p>
+
+      <ul class="atouts">
+        <li>
+          <span class="atouts__puce">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+          </span>
+          <span>
+            <b>Compatibilité vérifiée</b>
+            Chaque pièce est rattachée aux véhicules sur lesquels elle se monte
+          </span>
+        </li>
+        <li>
+          <span class="atouts__puce">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+          </span>
+          <span>
+            <b>Commande sans compte</b>
+            Créez-en un pour retrouver vos informations et payer en ligne
+          </span>
+        </li>
+        <li>
+          <span class="atouts__puce">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+          </span>
+          <span>
+            <b>Conseil par WhatsApp</b>
+            Un doute sur une référence ? Notre atelier répond directement
+          </span>
+        </li>
+      </ul>
+    </div>
+
+    <p class="vitrine__pied">Rufisque, Rue Ousmane Socé Diop</p>
+  </aside>
+
+  <!-- ================= FORMULAIRE ================= -->
+  <main class="panneau">
+    <div class="panneau__boite">
+      <!-- Logo repris ici, visible uniquement sur mobile -->
+      <img src="/assets/logo-horizontal.png" alt="MAIFA-AUTO" class="panneau__logo" />
+
+      <header class="panneau__tete">
+        <h1>Connexion</h1>
+        <p>Accédez à votre compte pour suivre vos commandes</p>
+      </header>
+
+      <form (ngSubmit)="onSubmit()" #loginForm="ngForm" novalidate>
+        <!-- Email -->
+        <div class="champ">
+          <label for="email">Adresse email</label>
+          <div class="champ__saisie">
+            <svg class="champ__icone" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+            </svg>
+            <input
+              id="email"
+              type="email"
+              placeholder="vous@exemple.com"
+              autocomplete="email"
+              [(ngModel)]="email"
+              name="email"
+              #emailCtrl="ngModel"
+              required
+              email
+            />
+          </div>
+          <p
+            class="champ__erreur"
+            *ngIf="emailCtrl.invalid && (emailCtrl.dirty || emailCtrl.touched)"
+          >
+            Adresse email invalide
+          </p>
+        </div>
+
+        <!-- Mot de passe -->
+        <div class="champ">
+          <div class="champ__entete">
+            <label for="password">Mot de passe</label>
+            <a routerLink="/password" class="champ__oubli">Oublié ?</a>
+          </div>
+
+          <div class="champ__saisie">
+            <svg class="champ__icone" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="11" width="18" height="11" rx="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <input
+              id="password"
+              [type]="voirMotDePasse ? 'text' : 'password'"
+              placeholder="Votre mot de passe"
+              autocomplete="current-password"
+              [(ngModel)]="password"
+              name="password"
+              #passwordCtrl="ngModel"
+              required
+              minlength="6"
+            />
+            <!-- Voir le mot de passe : évite les erreurs de saisie au clavier tactile -->
+            <button
+              type="button"
+              class="champ__oeil"
+              (click)="voirMotDePasse = !voirMotDePasse"
+              [attr.aria-label]="
+                voirMotDePasse ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+              "
+            >
+              <svg *ngIf="!voirMotDePasse" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <svg *ngIf="voirMotDePasse" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M10.6 5.2A9.9 9.9 0 0 1 12 5c6.4 0 10 7 10 7a18 18 0 0 1-2.4 3.3" />
+                <path d="M6.6 6.7A18 18 0 0 0 2 12s3.6 7 10 7a9.8 9.8 0 0 0 4.2-.9" />
+                <path d="M3 3l18 18" />
+              </svg>
+            </button>
+          </div>
+          <p
+            class="champ__erreur"
+            *ngIf="passwordCtrl.invalid && (passwordCtrl.dirty || passwordCtrl.touched)"
+          >
+            Mot de passe requis, 6 caractères minimum
+          </p>
+        </div>
+
+        <!-- Bouton : un <button> permet d'afficher un indicateur de chargement -->
+        <button type="submit" class="btn-connexion" [disabled]="!loginForm.form.valid || isLoading">
+          <span class="spin" *ngIf="isLoading"></span>
+          {{ isLoading ? 'Connexion en cours…' : 'Se connecter' }}
+        </button>
+
+        <!-- Connexion Google -->
+        <app-bouton-google texte="signin_with" (connecte)="apresGoogle($event)"></app-bouton-google>
+
+        <!-- Messages -->
+        <div class="message message--ok" *ngIf="successMessage">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+          <span>{{ successMessage }}</span>
+        </div>
+
+        <div class="message message--ko" *ngIf="errorMessage">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 8v4m0 4h.01" />
+          </svg>
+          <span>{{ errorMessage }}</span>
+        </div>
+      </form>
+
+      <p class="panneau__inscription">
+        Pas encore de compte ?
+        <a routerLink="/compte">Créer un compte</a>
+      </p>
+
+      <a routerLink="/" class="panneau__retour">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+        Retour au catalogue
+      </a>
+    </div>
+  </main>
+</div>

@@ -1,0 +1,395 @@
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+/>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <a routerLink="/" aria-label="MAIFA-AUTO, retour à l'accueil">
+      <img src="assets/logo-horizontal.png" alt="MAIFA-AUTO" class="logo" />
+    </a>
+    <span class="brand-tagline">Le coin des mécanos</span>
+  </div>
+
+  <div class="header-search">
+    <i class="fas fa-search search-icon"></i>
+    <input
+      type="search"
+      placeholder="Rechercher une pièce, marque, modèle..."
+      [(ngModel)]="searchText"
+    />
+  </div>
+
+  <div class="header-right">
+    <!-- Visiteur : invitation a se connecter -->
+    <a class="btn-connexion" routerLink="/login" *ngIf="!session.estConnecte()">
+      <i class="fas fa-user"></i>
+      <span>Connexion</span>
+    </a>
+
+    <!-- Connecte : identite et menu -->
+    <div class="compte" *ngIf="session.estConnecte()">
+      <button
+        type="button"
+        class="compte__bouton"
+        (click)="basculerMenu($event)"
+        [attr.aria-expanded]="menuOuvert"
+        aria-haspopup="true"
+      >
+        <!-- Photo Google si disponible, sinon les initiales -->
+        <img
+          *ngIf="session.utilisateur()?.avatar"
+          [src]="session.utilisateur()!.avatar"
+          [alt]="session.prenom()"
+          class="compte__avatar"
+        />
+        <span *ngIf="!session.utilisateur()?.avatar" class="compte__initiales">
+          {{ initiales }}
+        </span>
+
+        <span class="compte__nom">
+          <b>{{ session.utilisateur()?.prenom }}</b>
+          <em>{{ session.utilisateur()?.nom }}</em>
+        </span>
+
+        <svg class="compte__chevron" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+
+      <div class="compte__menu" *ngIf="menuOuvert">
+        <div class="compte__entete">
+          <b>{{ session.utilisateur()?.prenom }} {{ session.utilisateur()?.nom }}</b>
+          <span>{{ session.utilisateur()?.mail }}</span>
+        </div>
+
+        <a routerLink="/profil" (click)="menuOuvert = false">
+          <i class="fas fa-user-gear"></i> Mon profil
+        </a>
+
+        <a routerLink="/Panier" (click)="menuOuvert = false">
+          <i class="fas fa-shopping-cart"></i> Mon panier
+          <em class="mono" *ngIf="panier.nbArticles() > 0">{{ panier.nbArticles() }}</em>
+        </a>
+
+        <!-- Acces gestion, reserve au role gestionnaire -->
+        <a
+          routerLink="/Dashboard"
+          (click)="menuOuvert = false"
+          *ngIf="session.estGestionnaire()"
+          class="compte__gestion"
+        >
+          <i class="fas fa-gauge-high"></i> Espace de gestion
+        </a>
+
+        <button type="button" class="compte__quitter" (click)="deconnecter()">
+          <i class="fas fa-right-from-bracket"></i> Se déconnecter
+        </button>
+      </div>
+    </div>
+    <button class="btn-panier" (click)="openPanier()">
+      <i class="fas fa-shopping-cart"></i>
+    </button>
+  </div>
+</header>
+
+<!-- HERO BANNER -->
+<section class="hero">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1>Trouvez la pièce qu'il vous faut</h1>
+    <p>Des milliers de pièces détachées pour tous vos véhicules</p>
+  </div>
+</section>
+
+<!-- FILTRES -->
+<section class="filters-section">
+  <!--
+    ONGLETS DE RECHERCHE
+    Le second onglet est une fonctionnalite d'essai : il se retire
+    avec le composant app-recherche-vin et le bloc correspondant
+    dans acceuil.ts.
+  -->
+  <div class="recherche-onglets" role="tablist" aria-label="Mode de recherche du véhicule">
+    <button
+      type="button"
+      role="tab"
+      [class.is-active]="ongletRecherche === 'vehicule'"
+      [attr.aria-selected]="ongletRecherche === 'vehicule'"
+      (click)="changerOnglet('vehicule')"
+    >
+      <i class="fas fa-car"></i>
+      Par véhicule
+    </button>
+
+    <button
+      type="button"
+      role="tab"
+      [class.is-active]="ongletRecherche === 'vin'"
+      [attr.aria-selected]="ongletRecherche === 'vin'"
+      (click)="changerOnglet('vin')"
+    >
+      <i class="fas fa-barcode"></i>
+      Par numéro de châssis
+      <em class="onglet-neuf">Nouveau</em>
+    </button>
+  </div>
+
+  <div class="filters-bar" *ngIf="ongletRecherche === 'vehicule'">
+    <div class="filter-group">
+      <label><i class="fas fa-car"></i> Marque</label>
+      <select [(ngModel)]="selectedMarque" name="marque" (change)="onMarqueChange()">
+        <option value="">Toutes les Marques</option>
+        <option *ngFor="let m of marques" [value]="m">{{ m }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label><i class="fas fa-cogs"></i> Modèle</label>
+      <select [(ngModel)]="selectedModele" name="modele" [disabled]="!selectedMarque">
+        <option value="">Sélectionner Modèle</option>
+        <option *ngFor="let mod of modelesFiltr" [value]="mod">{{ mod }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label><i class="fas fa-calendar-alt"></i> Année</label>
+      <!--
+        La liste vient du composant et non du gabarit : figee a
+        2020, elle rendait inaccessible la majeure partie du parc,
+        et un millesime decode par le chassis tombait hors liste.
+      -->
+      <select [(ngModel)]="selectedAnnee" name="annee">
+        <option value="">Toutes les Années</option>
+        <option *ngFor="let year of annees" [value]="year">{{ year }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label><i class="fas fa-edit"></i> Recherche manuelle</label>
+      <input
+        type="text"
+        placeholder="Taper un modèle..."
+        [(ngModel)]="selectedModele"
+        name="modele_manual"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label><i class="fas fa-th-large"></i> Catégorie</label>
+      <select [(ngModel)]="selectedCategorie" name="categorie">
+        <option value="">Toutes les catégories</option>
+        <option *ngFor="let c of categories" [value]="c.slug">{{ c.nom }} ({{ c.nb }})</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Recherche par numero de chassis (fonctionnalite d'essai) -->
+  <div class="filters-vin" *ngIf="ongletRecherche === 'vin'">
+    <app-recherche-vin (vehiculeTrouve)="vinTrouve($event)"></app-recherche-vin>
+  </div>
+</section>
+
+<!-- CATALOGUE -->
+<section class="catalogue" id="resultats">
+  <!-- PASTILLES DE CATÉGORIES -->
+  <div class="cat-chips" *ngIf="categories.length">
+    <button
+      type="button"
+      class="chip"
+      [class.is-active]="!aDesFiltres"
+      (click)="reinitialiserFiltres()"
+    >
+      Toutes
+      <em class="mono">{{ totalCatalogue }}</em>
+    </button>
+
+    <button
+      type="button"
+      class="chip"
+      *ngFor="let c of categories"
+      [class.is-active]="selectedCategorie === c.slug && !selectedSousCategorie"
+      (click)="choisirCategorie(c.slug)"
+    >
+      {{ c.nom }}
+      <em class="mono">{{ c.nb }}</em>
+    </button>
+  </div>
+
+  <!-- Filtre detaille actif -->
+  <div class="filtre-actif" *ngIf="selectedSousCategorie">
+    <span>
+      Filtre : <b>{{ nomCategorie(selectedCategorie) }}</b> ›
+      <b>{{ nomSousCategorie(selectedSousCategorie) }}</b>
+    </span>
+    <button type="button" (click)="reinitialiserFiltres()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+      Retirer
+    </button>
+  </div>
+
+  <h2 class="section-title">
+    <span>{{ titreResultats }}</span>
+    <small>
+      {{ filteredPieces.length }} pièce{{ filteredPieces.length > 1 ? 's' : '' }}
+      <em *ngIf="totalCatalogue > filteredPieces.length">sur {{ totalCatalogue }} au catalogue</em>
+    </small>
+  </h2>
+
+  <div class="cards-grid">
+    <div class="card" *ngFor="let piece of filteredPieces">
+      <div class="card-image">
+        <img
+          [src]="piece.img_url"
+          [alt]="piece.marque + ' ' + piece.modele"
+          (error)="piece.img_url = 'assets/placeholder.jpg'"
+        />
+
+        <span
+          class="badge-etat"
+          [ngClass]="{ neuf: piece.etat === 'Neuf', occasion: piece.etat !== 'Neuf' }"
+        >
+          {{ piece.etat }}
+        </span>
+      </div>
+      <div class="card-body">
+        <h3>{{ piece.marque }} {{ piece.modele }}</h3>
+        <p class="description">{{ piece.description }}</p>
+        <div class="card-meta">
+          <span><i class="fas fa-calendar"></i> {{ piece.annee }}</span>
+          <span><i class="fas fa-truck"></i> {{ piece.fournisseur }}</span>
+        </div>
+        <div class="card-footer">
+          <div class="price">{{ piece.prix | currency: 'XOF' : 'symbol' : '1.0-0' }}</div>
+
+          <a class="btn-details" [routerLink]="['/piece', piece.slug || piece.id]">
+            Voir <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="no-result" *ngIf="filteredPieces.length === 0">
+    <i class="fas fa-search fa-3x"></i>
+    <p>Aucune pièce ne correspond à vos critères.</p>
+    <small *ngIf="selectedCategorie">
+      Aucune pièce dans « {{ nomCategorie(selectedCategorie) }} » pour le moment.
+    </small>
+    <small *ngIf="!selectedCategorie">Essayez de modifier vos filtres ou votre recherche.</small>
+
+    <button
+      type="button"
+      class="cat-reset"
+      *ngIf="selectedCategorie"
+      (click)="choisirCategorie('')"
+    >
+      Voir toutes les pièces
+    </button>
+  </div>
+</section>
+
+<!-- FILTRES DÉTAILLÉS -->
+<section class="familles" *ngIf="familles.length">
+  <div class="familles__head">
+    <div>
+      <h2>Rechercher par type de pièce</h2>
+      <p>Les types de pièces disponibles sont cliquables</p>
+    </div>
+    <button type="button" class="cat-reset" *ngIf="aDesFiltres" (click)="reinitialiserFiltres()">
+      Voir toutes les pièces
+    </button>
+  </div>
+
+  <div class="familles__grid">
+    <article
+      class="famille"
+      *ngFor="let f of familles"
+      [class.is-active]="selectedCategorie === f.slug"
+      [class.is-vide]="f.nb === 0"
+    >
+      <header class="famille__head">
+        <span class="famille__icone">
+          <app-icone-piece [slug]="f.slug"></app-icone-piece>
+        </span>
+        <span class="famille__titre">{{ f.nom }}</span>
+        <span class="famille__compte mono" *ngIf="f.nb > 0">{{ f.nb }}</span>
+        <span class="famille__vide" *ngIf="f.nb === 0">bientôt</span>
+      </header>
+
+      <ul class="famille__liste">
+        <li *ngFor="let sc of sousCategoriesVisibles(f)">
+          <button
+            type="button"
+            [class.is-active]="selectedSousCategorie === sc.slug"
+            [class.is-autres]="sc.autres"
+            [class.is-vide]="sc.nb === 0"
+            [disabled]="sc.nb === 0"
+            [title]="
+              sc.nb === 0
+                ? 'Aucune pièce dans cette sous-catégorie pour le moment'
+                : sc.autres
+                  ? 'Pièces dont la sous-catégorie n\'est pas encore précisée'
+                  : sc.nom
+            "
+            (click)="choisirSousCategorie(f.slug, sc.slug)"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+            <span>{{ sc.nom }}</span>
+            <em class="mono" *ngIf="sc.nb > 0">{{ sc.nb }}</em>
+          </button>
+        </li>
+      </ul>
+
+      <!-- Voir plus : certaines familles ont jusqu'à sept sous-catégories -->
+      <button
+        type="button"
+        class="famille__plus"
+        *ngIf="f.sous.length > LIMITE_SOUS_CAT"
+        (click)="basculerFamille(f.slug)"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+        {{
+          estDepliee(f.slug)
+            ? 'Voir moins'
+            : 'Voir plus (' + (f.sous.length - LIMITE_SOUS_CAT) + ')'
+        }}
+      </button>
+    </article>
+  </div>
+</section>
+
+<!-- BOUTONS FLOTTANTS -->
+<app-boutons-flottants></app-boutons-flottants>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-col footer-brand">
+      <img src="assets/logo-horizontal-blanc.png" alt="MAIFA-AUTO" class="footer-logo" />
+      <p class="slogan">Weur ba soon diekhna !!!</p>
+    </div>
+
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul>
+        <li><i class="fas fa-envelope"></i> teranga_auto&#64;mecaequip.sn</li>
+        <li><i class="fas fa-phone"></i> +221 77 649 05 36</li>
+        <li><i class="fas fa-map-marker-alt"></i> Rufisque, Rue Ousane Soce Diop</li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Besoin d'aide ?</h4>
+      <p>Vous ne trouvez pas la pièce recherchée ?</p>
+      <a routerLink="/demande" class="btn-demande">
+        <i class="fas fa-paper-plane"></i> Demander une pièce
+      </a>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>&copy; 2026 MecaEquip - Tous droits réservés.</p>
+  </div>
+</footer>

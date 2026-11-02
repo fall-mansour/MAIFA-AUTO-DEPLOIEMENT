@@ -1,0 +1,280 @@
+<!-- ================= BARRE HAUTE ================= -->
+<header class="entete">
+  <img src="/assets/logo-horizontal.png" alt="Teranga Motors" class="logo" />
+
+  <div class="entete__title">
+    <h1>Commandes</h1>
+    <p>Confirmez pour déstocker, annulez pour restituer</p>
+  </div>
+
+  <nav class="entete__nav">
+    <a routerLink="/Dashboard">Tableau de bord</a>
+    <a routerLink="/stock">Stock</a>
+  </nav>
+</header>
+
+<div class="page">
+  <!-- ================= CHIFFRES ================= -->
+  <section class="kpis" *ngIf="stats">
+    <button
+      type="button"
+      class="kpi"
+      [class.is-active]="filtre === 'en_attente'"
+      [class.kpi--attente]="stats.en_attente > 0"
+      (click)="filtrer('en_attente')"
+    >
+      <span class="kpi__label">En attente</span>
+      <strong class="kpi__value mono">{{ stats.en_attente }}</strong>
+      <span class="kpi__hint mono">{{ stats.en_attente_montant | number: '1.0-0' }} FCFA</span>
+    </button>
+
+    <button
+      type="button"
+      class="kpi"
+      [class.is-active]="filtre === 'confirmee'"
+      (click)="filtrer('confirmee')"
+    >
+      <span class="kpi__label">Confirmées</span>
+      <strong class="kpi__value mono">{{ stats.confirmees }}</strong>
+      <span class="kpi__hint">à livrer</span>
+    </button>
+
+    <button
+      type="button"
+      class="kpi"
+      [class.is-active]="filtre === 'livree'"
+      (click)="filtrer('livree')"
+    >
+      <span class="kpi__label">Livrées</span>
+      <strong class="kpi__value mono">{{ stats.livrees }}</strong>
+      <span class="kpi__hint">terminées</span>
+    </button>
+
+    <div class="kpi kpi--ca">
+      <span class="kpi__label">Chiffre d'affaires</span>
+      <strong class="kpi__value mono">
+        {{ stats.chiffre_affaires | number: '1.0-0' }}<em>FCFA</em>
+      </strong>
+      <span class="kpi__hint">commandes confirmées et livrées</span>
+    </div>
+  </section>
+
+  <!-- ================= FILTRES ================= -->
+  <div class="barre">
+    <div class="onglets">
+      <button type="button" [class.is-active]="filtre === ''" (click)="filtrer('')">Toutes</button>
+      <button
+        type="button"
+        [class.is-active]="filtre === 'en_attente'"
+        (click)="filtrer('en_attente')"
+      >
+        En attente
+      </button>
+      <button
+        type="button"
+        [class.is-active]="filtre === 'confirmee'"
+        (click)="filtrer('confirmee')"
+      >
+        Confirmées
+      </button>
+      <button type="button" [class.is-active]="filtre === 'livree'" (click)="filtrer('livree')">
+        Livrées
+      </button>
+      <button type="button" [class.is-active]="filtre === 'annulee'" (click)="filtrer('annulee')">
+        Annulées
+      </button>
+    </div>
+
+    <!-- Fraicheur des donnees et rafraichissement manuel -->
+    <div class="maj">
+      <button
+        type="button"
+        class="maj__bouton"
+        [class.is-actif]="actualisation"
+        (click)="rafraichir()"
+        [attr.aria-label]="'Actualiser la liste'"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21 12a9 9 0 1 1-2.6-6.4" />
+          <path d="M21 3v6h-6" />
+        </svg>
+        <span *ngIf="nouvelles > 0" class="maj__pastille">{{ nouvelles }}</span>
+      </button>
+      <span class="maj__texte" *ngIf="derniereMaj">{{ depuisMaj }}</span>
+    </div>
+
+    <div class="recherche">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-3.5-3.5" />
+      </svg>
+      <input type="search" placeholder="Référence, nom, téléphone…" [(ngModel)]="recherche" />
+    </div>
+  </div>
+
+  <!-- Nouvelles commandes arrivees depuis l'ouverture de la page -->
+  <div class="nouvelles-cmd" *ngIf="nouvelles > 0" (click)="nouvelles = 0">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+    </svg>
+    <span>
+      {{ nouvelles }} nouvelle{{ nouvelles > 1 ? 's' : '' }} commande{{ nouvelles > 1 ? 's' : '' }}
+      depuis votre arrivée sur la page
+    </span>
+  </div>
+
+  <p class="erreur" *ngIf="erreur">{{ erreur }}</p>
+
+  <!-- ================= LISTE ================= -->
+  <div class="liste" *ngIf="commandesFiltrees.length; else vide">
+    <article
+      class="cmd"
+      *ngFor="let c of commandesFiltrees"
+      [class.is-ouverte]="ouverte === c.id"
+      [class.is-bloquee]="c.statut === 'en_attente' && !c.stock_suffisant"
+      [class.is-nouvelle]="c.estNouvelle"
+    >
+      <!-- En-tête cliquable -->
+      <button type="button" class="cmd__head" (click)="basculer(c.id)">
+        <div class="cmd__ref">
+          <strong class="mono">{{ c.reference }}</strong>
+          <span class="cmd__date">{{ c.date_commande | date: 'dd/MM/yy à HH:mm' }}</span>
+        </div>
+
+        <div class="cmd__client">
+          <strong>{{ c.client }}</strong>
+          <span class="mono">{{ c.telephone }}</span>
+        </div>
+
+        <span class="tag-compte" [class.is-invite]="!c.avec_compte">
+          {{ c.avec_compte ? 'Compte' : 'Invité' }}
+        </span>
+
+        <span class="tag-paiement">{{ libellePaiement(c.mode_paiement) }}</span>
+
+        <div class="cmd__montant">
+          <strong class="mono">{{ c.total | number: '1.0-0' }}</strong>
+          <span class="mono">{{ c.nb_articles }} art.</span>
+        </div>
+
+        <span class="statut" [ngClass]="'is-' + c.statut">{{ libelleStatut(c.statut) }}</span>
+
+        <svg class="cmd__chevron" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+
+      <!-- Avertissement de stock -->
+      <div class="cmd__alerte" *ngIf="c.statut === 'en_attente' && !c.stock_suffisant">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 8v4m0 4h.01" />
+        </svg>
+        <span>
+          Stock insuffisant pour au moins un article. La confirmation échouera tant que vous n'aurez
+          pas réapprovisionné.
+        </span>
+      </div>
+
+      <!-- Détail -->
+      <div class="cmd__corps" *ngIf="ouverte === c.id">
+        <div class="cmd__articles">
+          <div class="art" *ngFor="let a of c.articles">
+            <img [src]="a.img_principale || 'assets/logo.jpeg'" [alt]="a.designation" />
+            <div class="art__infos">
+              <strong>{{ a.designation }}</strong>
+              <span>
+                <em class="mono" *ngIf="a.ref">Réf. {{ a.ref }}</em>
+                <em *ngIf="a.vehicule">{{ a.vehicule }}</em>
+                <em *ngIf="a.etat">{{ a.etat }}</em>
+              </span>
+              <span
+                class="art__stock"
+                *ngIf="c.statut === 'en_attente'"
+                [class.is-court]="a.stock_actuel !== null && a.stock_actuel < a.quantite"
+              >
+                {{
+                  a.stock_actuel === null ? 'Pièce supprimée' : 'Stock actuel : ' + a.stock_actuel
+                }}
+              </span>
+            </div>
+            <div class="art__prix">
+              <span class="mono">{{ a.quantite }} × {{ a.prix_unitaire | number: '1.0-0' }}</span>
+              <strong class="mono">{{ a.montant | number: '1.0-0' }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd__livraison">
+          <dl>
+            <div *ngIf="c.adresse_livraison">
+              <dt>Livraison</dt>
+              <dd>{{ c.adresse_livraison }}</dd>
+            </div>
+            <div *ngIf="c.email">
+              <dt>Email</dt>
+              <dd>{{ c.email }}</dd>
+            </div>
+            <div *ngIf="c.commentaire">
+              <dt>Précisions du client</dt>
+              <dd>{{ c.commentaire }}</dd>
+            </div>
+            <div>
+              <dt>Stock</dt>
+              <dd>{{ c.stock_decremente ? 'Déjà déduit' : 'Non déduit' }}</dd>
+            </div>
+          </dl>
+
+          <!-- Actions -->
+          <div class="actions">
+            <button
+              type="button"
+              class="btn btn--valider"
+              *ngIf="c.statut === 'en_attente'"
+              [disabled]="enCours === c.id"
+              (click)="changerStatut(c, 'confirmee')"
+            >
+              Confirmer et déstocker
+            </button>
+
+            <button
+              type="button"
+              class="btn btn--livrer"
+              *ngIf="c.statut === 'confirmee'"
+              [disabled]="enCours === c.id"
+              (click)="changerStatut(c, 'livree')"
+            >
+              Marquer comme livrée
+            </button>
+
+            <button
+              type="button"
+              class="btn btn--annuler"
+              *ngIf="c.statut !== 'annulee' && c.statut !== 'livree'"
+              [disabled]="enCours === c.id"
+              (click)="changerStatut(c, 'annulee')"
+            >
+              Annuler{{ c.stock_decremente ? ' et restituer' : '' }}
+            </button>
+
+            <a class="btn btn--tel" [href]="'tel:' + c.telephone">Appeler le client</a>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <ng-template #vide>
+    <div class="vide">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 4h2l2.7 11.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L22 8H7" />
+        <circle cx="10" cy="20" r="1.5" />
+        <circle cx="18" cy="20" r="1.5" />
+      </svg>
+      <h2>{{ chargement ? 'Chargement…' : 'Aucune commande' }}</h2>
+      <p *ngIf="!chargement && filtre">Aucune commande avec ce statut.</p>
+      <p *ngIf="!chargement && !filtre">Les commandes des clients apparaîtront ici.</p>
+    </div>
+  </ng-template>
+</div>

@@ -1,0 +1,255 @@
+<div class="fiche" *ngIf="data && !erreur; else etatSpecial">
+  <!-- ================= FIL D'ARIANE ================= -->
+  <nav class="ariane">
+    <a routerLink="/">Accueil</a>
+    <span>›</span>
+    <a
+      routerLink="/"
+      [queryParams]="{ categorie: data.piece.categorie }"
+      *ngIf="data.piece.categorie"
+    >
+      {{ data.piece.categorie }}
+    </a>
+    <span *ngIf="data.piece.categorie">›</span>
+    <strong>{{ data.piece.description }}</strong>
+  </nav>
+
+  <!-- ================= HAUT DE FICHE ================= -->
+  <div class="head">
+    <!-- Galerie -->
+    <div class="galerie">
+      <div class="galerie__vignettes" *ngIf="data.images.length > 1">
+        <button
+          type="button"
+          *ngFor="let img of data.images; let i = index"
+          [class.is-active]="img === imageActive"
+          (click)="imageActive = img"
+          [attr.aria-label]="'Photo ' + (i + 1)"
+        >
+          <img [src]="img" alt="" />
+        </button>
+      </div>
+
+      <div class="galerie__scene" [class.is-zoom]="zoom" (click)="zoom = !zoom">
+        <img [src]="imageActive || 'assets/logo.jpeg'" [alt]="data.piece.description" />
+        <span class="galerie__hint" *ngIf="!zoom">Cliquez pour agrandir</span>
+        <span class="etat-tag" *ngIf="data.piece.etat">{{ data.piece.etat }}</span>
+      </div>
+    </div>
+
+    <!-- Achat -->
+    <aside class="achat">
+      <p class="achat__cat" *ngIf="data.piece.categorie">{{ data.piece.categorie }}</p>
+      <h1>{{ data.piece.description }}</h1>
+      <p class="achat__ref mono" *ngIf="data.piece.ref">Réf. {{ data.piece.ref }}</p>
+
+      <div class="achat__prix mono">{{ data.piece.prix | number: '1.0-0' }}<em>FCFA</em></div>
+
+      <div class="dispo" [ngClass]="'is-' + disponibilite">
+        <span class="dot"></span>
+        <span *ngIf="disponibilite === 'stock'">
+          Disponible immédiatement <b>({{ data.piece.quantite }} en stock)</b>
+        </span>
+        <span *ngIf="disponibilite === 'dernieres'">
+          Plus que <b>{{ data.piece.quantite }}</b> en stock
+        </span>
+        <span *ngIf="disponibilite === 'commande'">Sur commande</span>
+      </div>
+
+      <!-- ===== EN STOCK : ajout au panier ===== -->
+      <ng-container *ngIf="stock > 0">
+        <!-- Quantité, seulement s'il reste plus d'une unité à prendre -->
+        <div class="qte" *ngIf="ajoutMaximum > 1">
+          <span class="qte__label">Quantité</span>
+          <div class="qte__controle">
+            <button
+              type="button"
+              (click)="changerQuantite(-1)"
+              [disabled]="quantite <= 1"
+              aria-label="Diminuer"
+            >
+              &minus;
+            </button>
+            <span class="mono">{{ quantite }}</span>
+            <button
+              type="button"
+              (click)="changerQuantite(1)"
+              [disabled]="quantite >= ajoutMaximum"
+              aria-label="Augmenter"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        <!-- Pièce unique : pas de sélecteur, on l'annonce -->
+        <p class="qte__unique" *ngIf="ajoutMaximum === 1 && stock === 1">
+          Pièce unique, un seul exemplaire disponible.
+        </p>
+
+        <button
+          type="button"
+          class="btn-primary"
+          [disabled]="ajoutMaximum === 0"
+          (click)="ajouterAuPanier()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 4h2l2.7 11.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L22 8H7" />
+            <circle cx="10" cy="20" r="1.4" />
+            <circle cx="18" cy="20" r="1.4" />
+          </svg>
+          {{ ajoutMaximum === 0 ? 'Tout le stock est dans votre panier' : 'Ajouter au panier' }}
+        </button>
+
+        <!-- Confirmation d'ajout -->
+        <div class="ajout-ok" *ngIf="ajoutConfirme">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+          <span>Ajouté au panier</span>
+          <a routerLink="/Panier">Voir le panier</a>
+        </div>
+
+        <p class="ajout-erreur" *ngIf="messageAjout">{{ messageAjout }}</p>
+
+        <!-- Rappel de ce qui est déjà réservé -->
+        <p class="deja-panier" *ngIf="dejaDansPanier > 0 && !ajoutConfirme">
+          {{ dejaDansPanier }} exemplaire{{ dejaDansPanier > 1 ? 's' : '' }} déjà dans votre panier.
+          <a routerLink="/Panier">Voir le panier</a>
+        </p>
+      </ng-container>
+
+      <!-- ===== RUPTURE : la demande garde tout son sens ===== -->
+      <ng-container *ngIf="stock === 0">
+        <a class="btn-primary" routerLink="/demande" [queryParams]="{ piece: data.piece.id }">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m22 2-7 20-4-9-9-4Z" />
+            <path d="M22 2 11 13" />
+          </svg>
+          Demander cette pièce
+        </a>
+        <p class="rupture-note">
+          Cette pièce n'est pas en stock. Envoyez-nous une demande, nous vous prévenons dès sa
+          disponibilité.
+        </p>
+      </ng-container>
+
+      <ul class="reassure">
+        <li *ngIf="data.piece.fournisseur">Fournisseur {{ data.piece.fournisseur }}</li>
+        <li>
+          Compatibilité vérifiée sur {{ data.compatibilites.length }} véhicule{{
+            data.compatibilites.length > 1 ? 's' : ''
+          }}
+        </li>
+      </ul>
+    </aside>
+  </div>
+
+  <!-- ================= VÉHICULES COMPATIBLES ================= -->
+  <section class="bloc bloc--compat" *ngIf="data.compatibilites.length">
+    <h2>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="m20 9-1.3-4a2 2 0 0 0-1.9-1.4H7.2A2 2 0 0 0 5.3 5L4 9m16 0H4m16 0v7h-2m-14-7v7h2m0 0h10m-10 0v2H6v-2m12 0v2h-2v-2"
+        />
+        <circle cx="7.5" cy="12.5" r="1" />
+        <circle cx="16.5" cy="12.5" r="1" />
+      </svg>
+      Compatible avec ces véhicules
+    </h2>
+
+    <div class="compat-grid">
+      <div class="compat-item" *ngFor="let c of data.compatibilites">
+        <strong>{{ c.marque }} {{ c.modele }}</strong>
+        <span *ngIf="c.annee_min || c.annee_max">
+          {{ c.annee_min || '…' }} – {{ c.annee_max || '…' }}
+        </span>
+        <span class="compat-item__moteur" *ngIf="c.motorisation">{{ c.motorisation }}</span>
+      </div>
+    </div>
+
+    <p class="bloc__note">
+      Vérifiez la référence de votre pièce d'origine avant commande. En cas de doute, contactez
+      l'atelier avec la carte grise du véhicule.
+    </p>
+  </section>
+
+  <!-- ================= CARACTÉRISTIQUES ET RÉFÉRENCES ================= -->
+  <div class="deux-cols">
+    <section class="bloc">
+      <h2>Tout savoir sur la pièce</h2>
+      <dl class="specs">
+        <div *ngFor="let s of caracteristiques">
+          <dt>{{ s.label }}</dt>
+          <dd [class.mono]="s.mono">{{ s.valeur }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="bloc" *ngIf="data.references.length">
+      <h2>Références</h2>
+      <ul class="refs">
+        <li *ngFor="let r of data.references">
+          <span class="refs__type" [ngClass]="'is-' + r.type">{{ libelleType(r.type) }}</span>
+          <span class="refs__num mono">{{ r.reference }}</span>
+          <span class="refs__fab" *ngIf="r.fabricant">{{ r.fabricant }}</span>
+        </li>
+      </ul>
+      <p class="bloc__note">
+        Ces numéros désignent la même pièce chez différents fabricants. Utilisez-les pour comparer.
+      </p>
+    </section>
+  </div>
+
+  <!-- ================= ÉQUIVALENCES EN STOCK ================= -->
+  <section class="bloc" *ngIf="data.equivalences.length">
+    <h2>Cette référence existe aussi</h2>
+    <div class="cartes">
+      <a class="carte" *ngFor="let p of data.equivalences" [routerLink]="['/piece', p.slug]">
+        <div class="carte__img">
+          <img [src]="p.img_principale || 'assets/logo.jpeg'" [alt]="p.description" />
+        </div>
+        <span class="carte__nom">{{ p.description }}</span>
+        <span class="carte__ref mono" *ngIf="p.ref">{{ p.ref }}</span>
+        <span class="carte__prix mono">{{ p.prix | number: '1.0-0' }} FCFA</span>
+        <span class="carte__stock" [class.is-out]="p.quantite === 0">
+          {{ p.quantite > 0 ? p.quantite + ' en stock' : 'Sur commande' }}
+        </span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ================= AUTRES PIÈCES DU VÉHICULE ================= -->
+  <section class="bloc" *ngIf="data.autres_vehicule.length">
+    <h2>{{ data.autres_titre }}</h2>
+    <div class="cartes">
+      <a class="carte" *ngFor="let p of data.autres_vehicule" [routerLink]="['/piece', p.slug]">
+        <div class="carte__img">
+          <img [src]="p.img_principale || 'assets/logo.jpeg'" [alt]="p.description" />
+        </div>
+        <span class="carte__nom">{{ p.description }}</span>
+        <span class="carte__ref mono" *ngIf="p.ref">{{ p.ref }}</span>
+        <span class="carte__prix mono">{{ p.prix | number: '1.0-0' }} FCFA</span>
+        <span class="carte__stock" [class.is-out]="p.quantite === 0">
+          {{ p.quantite > 0 ? p.quantite + ' en stock' : 'Sur commande' }}
+        </span>
+      </a>
+    </div>
+  </section>
+</div>
+
+<!-- ================= CHARGEMENT / ERREUR ================= -->
+<ng-template #etatSpecial>
+  <div class="loader" *ngIf="!erreur">
+    <div class="loader__spin"></div>
+    <p>Chargement de la pièce…</p>
+  </div>
+
+  <div class="erreur" *ngIf="erreur">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 8v4m0 4h.01" />
+    </svg>
+    <h1>Pièce introuvable</h1>
+    <p>{{ erreur }}</p>
+    <a class="btn-primary" routerLink="/">Retour au catalogue</a>
+  </div>
+</ng-template>

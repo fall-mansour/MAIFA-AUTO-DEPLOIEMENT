@@ -1,0 +1,653 @@
+/* =========================================================
+   MAIFA-AUTO — DEMANDE DE PIECE
+   Palette du logo : bleu nuit #12314B + orange #F2762E
+========================================================= */
+
+/* --- Bleu nuit --- */
+$navy-900: #081724;
+$navy-800: #0b1f30;
+$navy: #12314b; // couleur exacte du logo
+$navy-600: #1b4a6f;
+$navy-400: #3f80b0;
+
+/* --- Orange ---
+   Le blanc sur orange ne donne que 2.84:1, insuffisant pour du petit
+   texte. Le bouton orange porte donc un texte bleu nuit (6.39:1).
+   $orange-700 est lisible en TEXTE sur blanc, $orange-800 sur aplat. */
+$orange-800: #a8480f;
+$orange-700: #c25317;
+$orange-600: #d9631f;
+$orange: #f2762e;
+$orange-400: #ff9052;
+$orange-50: #fff4ed;
+
+$white: #ffffff;
+$page: #f6f8fb;
+$line: #dfe5ee;
+$line-strong: #c3cddb;
+
+$text: $navy;
+$dim: #435a76;
+$mute: #647489; // 4.77:1 sur blanc
+$mute-light: #8d9bb0; // bordures et icones uniquement
+
+$green: #077f55;
+$green-bg: #edf7f3;
+$red: #cc1f1f;
+$red-bg: #fdf2f2;
+
+$font:
+  'Inter',
+  'Segoe UI',
+  system-ui,
+  -apple-system,
+  sans-serif;
+$radius: 14px;
+$radius-sm: 10px;
+$radius-full: 9999px;
+
+$shadow-md:
+  0 4px 6px rgba($navy, 0.05),
+  0 10px 15px rgba($navy, 0.08);
+$shadow-xl:
+  0 20px 50px rgba($navy, 0.12),
+  0 25px 60px rgba($navy, 0.07);
+
+$ease: cubic-bezier(0.4, 0, 0.2, 1);
+$transition: all 0.25s $ease;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================
+   PAGE
+========================================================= */
+:host {
+  display: block;
+  min-height: 100vh;
+  font-family: $font;
+  color: $text;
+  background: $page;
+  -webkit-font-smoothing: antialiased;
+}
+
+.demande-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 48px 24px 72px;
+  background:
+    radial-gradient(ellipse at 15% 0%, rgba($navy-400, 0.08) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 100%, rgba($orange, 0.06) 0%, transparent 50%), $page;
+}
+
+.form-card {
+  width: 100%;
+  max-width: 740px;
+  background: $white;
+  border: 1px solid $line;
+  border-radius: 18px;
+  box-shadow: $shadow-xl;
+  overflow: hidden;
+  animation: fadeInUp 0.55s $ease;
+}
+
+/* =========================================================
+   EN-TETE BLEU NUIT
+========================================================= */
+.form-header {
+  position: relative;
+  overflow: hidden;
+  padding: 38px 40px 40px;
+  text-align: center;
+  background: linear-gradient(150deg, $navy-900 0%, $navy 55%, $navy-600 100%);
+
+  /* Halo orange, comme le hero de l'accueil */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 88% 80%, rgba($orange, 0.3) 0%, transparent 52%),
+      radial-gradient(circle at 12% 18%, rgba($navy-400, 0.28) 0%, transparent 46%);
+  }
+
+  /* Filet orange en bas, rappel du logo */
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 4px;
+    background: linear-gradient(90deg, $orange-600, $orange, $orange-400);
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  &__badge {
+    display: inline-block;
+    margin-bottom: 14px;
+    padding: 5px 14px;
+    border-radius: $radius-full;
+    background: rgba($orange, 0.2);
+    border: 1px solid rgba($orange, 0.5);
+    color: $orange-400;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin-bottom: 10px;
+    color: $white;
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+  }
+
+  p {
+    color: rgba($white, 0.85);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  &__slogan {
+    margin-top: 6px;
+    font-style: italic;
+    font-size: 0.85rem !important;
+    color: rgba($white, 0.55) !important;
+  }
+}
+
+/* =========================================================
+   FORMULAIRE EN SECTIONS
+========================================================= */
+form {
+  padding: 34px 40px 38px;
+}
+
+.section {
+  margin-bottom: 28px;
+
+  &__titre {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid $line;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: $navy-800;
+  }
+
+  /* Numero d'etape, en bleu nuit */
+  &__num {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, $navy-800, $navy-600);
+    color: $white;
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+
+  &__pre {
+    padding: 2px 10px;
+    border-radius: $radius-full;
+    background: $green-bg;
+    color: $green;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+
+  &--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  &--large {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: $dim;
+    letter-spacing: 0.3px;
+
+    /* Repere orange, rappel de la marque */
+    &::before {
+      content: '';
+      width: 3px;
+      height: 13px;
+      border-radius: 2px;
+      background: $orange;
+      flex-shrink: 0;
+    }
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: 13px 15px;
+    border: 2px solid $line;
+    border-radius: $radius-sm;
+    background: $white;
+    color: $text;
+    font-family: $font;
+    font-size: 0.93rem;
+    outline: none;
+    transition: $transition;
+
+    &::placeholder {
+      color: $mute-light;
+    }
+
+    &:hover:not(:disabled) {
+      border-color: $line-strong;
+    }
+
+    &:focus {
+      border-color: $orange;
+      box-shadow: 0 0 0 4px rgba($orange, 0.14);
+    }
+
+    &:disabled {
+      background: $page;
+      color: $mute;
+      cursor: not-allowed;
+    }
+  }
+
+  select {
+    appearance: none;
+    cursor: pointer;
+    padding-right: 38px;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" fill="none" stroke="%23647489" stroke-width="1.6" stroke-linecap="round"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+
+  textarea {
+    min-height: 130px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+}
+
+/* Aide sous les champs */
+.aide {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: $red;
+
+  &--discret {
+    color: $mute;
+  }
+
+  &--alerte {
+    color: $red;
+    font-weight: 600;
+  }
+}
+
+/* =========================================================
+   ENVOI
+========================================================= */
+.form-actions {
+  margin-top: 8px;
+
+  &__alt {
+    margin-top: 14px;
+    text-align: center;
+    font-size: 0.86rem;
+    color: $mute;
+
+    a {
+      color: $orange-700;
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+
+      &:hover {
+        color: $orange-800;
+      }
+    }
+  }
+}
+
+.btn-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 15px 24px;
+  border: 0;
+  border-radius: $radius-sm;
+  background: linear-gradient(135deg, $orange-600, $orange 60%, $orange-400);
+
+  /* Texte bleu nuit : le blanc sur cet orange tombe a 2.84:1 */
+  color: $navy-900;
+  font-family: $font;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba($orange, 0.36);
+  transition: $transition;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba($orange, 0.48);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0) scale(0.99);
+  }
+
+  &:disabled {
+    background: $line;
+    color: $mute;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}
+
+.spin {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba($navy-900, 0.25);
+  border-top-color: $navy-900;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+.message-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+  pointer-events: none;
+
+  .alert-box {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    padding: 16px 44px 16px 18px;
+    border: 1px solid;
+    border-radius: $radius;
+    background: $white;
+    box-shadow: $shadow-xl;
+    pointer-events: all;
+    animation: slideInRight 0.35s $ease;
+
+    .icon {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      flex-shrink: 0;
+      border-radius: 50%;
+
+      svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2.6;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+    }
+
+    .content {
+      flex: 1;
+
+      p {
+        font-size: 0.86rem;
+        line-height: 1.5;
+      }
+
+      strong {
+        display: block;
+        margin-bottom: 2px;
+        font-size: 0.93rem;
+        font-weight: 700;
+      }
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      padding: 2px 7px;
+      border: 0;
+      border-radius: 6px;
+      background: none;
+      color: inherit;
+      font-size: 1.3rem;
+      line-height: 1;
+      opacity: 0.5;
+      cursor: pointer;
+      transition: $transition;
+
+      &:hover {
+        opacity: 1;
+        background: rgba($navy, 0.06);
+      }
+    }
+
+    &.success {
+      border-color: rgba($green, 0.28);
+      border-left: 4px solid $green;
+      color: $green;
+
+      .icon {
+        background: $green-bg;
+      }
+
+      .content p {
+        color: $dim;
+      }
+
+      strong {
+        color: $green;
+      }
+    }
+
+    &.error {
+      border-color: rgba($red, 0.25);
+      border-left: 4px solid $red;
+      color: $red;
+      animation:
+        slideInRight 0.35s $ease,
+        shake 0.5s $ease 0.35s;
+
+      .icon {
+        background: $red-bg;
+      }
+
+      .content p {
+        color: $dim;
+      }
+
+      strong {
+        color: $red;
+      }
+    }
+  }
+}
+
+:focus-visible {
+  outline: 2px solid $orange;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =========================================================
+   TABLETTE
+========================================================= */
+@media (max-width: 768px) {
+  .demande-container {
+    padding: 28px 14px 48px;
+  }
+
+  .form-header {
+    padding: 30px 26px 32px;
+
+    h1 {
+      font-size: 1.45rem;
+    }
+  }
+
+  form {
+    padding: 26px 24px 30px;
+  }
+
+  /* Marque, modele, annee sur deux colonnes */
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .message-container {
+    top: 14px;
+    right: 14px;
+    left: 14px;
+    max-width: none;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+@media (max-width: 520px) {
+  .demande-container {
+    padding: 14px 10px 36px;
+  }
+
+  .form-card {
+    border-radius: $radius;
+  }
+
+  .form-header {
+    padding: 26px 20px 28px;
+
+    h1 {
+      font-size: 1.25rem;
+    }
+
+    p {
+      font-size: 0.88rem;
+    }
+  }
+
+  form {
+    padding: 22px 16px 26px;
+  }
+
+  .form-grid,
+  .form-grid--2 {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .section {
+    margin-bottom: 24px;
+  }
+}

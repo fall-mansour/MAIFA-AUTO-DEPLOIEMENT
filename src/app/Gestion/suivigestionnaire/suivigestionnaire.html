@@ -1,0 +1,263 @@
+<!-- ================= BARRE HAUTE ================= -->
+<header class="entete">
+  <img src="/assets/logo-horizontal.png" alt="MAIFA-AUTO" class="logo" />
+
+  <div class="entete__titre">
+    <h1>Suivi des gestionnaires</h1>
+    <p>Qui a fait quoi, et quand.</p>
+  </div>
+
+  <nav class="entete__nav">
+    <a routerLink="/Dashboard">Tableau de bord</a>
+    <a routerLink="/stock">Stock</a>
+    <a routerLink="/commandes">Commandes</a>
+    <a routerLink="/import">Import</a>
+  </nav>
+</header>
+
+<div class="page">
+  <!-- ================= ERREUR ================= -->
+  <div class="alerte" *ngIf="messageErreur">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v6m0 3.5h.01" />
+    </svg>
+    <p>{{ messageErreur }}</p>
+  </div>
+
+  <!-- ================= PÉRIODE ================= -->
+  <section class="periode">
+    <div class="periode__boutons">
+      <button type="button" [class.is-actif]="periode === '7j'" (click)="choisirPeriode('7j')">
+        7 derniers jours
+      </button>
+      <button type="button" [class.is-actif]="periode === '30j'" (click)="choisirPeriode('30j')">
+        30 derniers jours
+      </button>
+      <button type="button" [class.is-actif]="periode === 'tout'" (click)="choisirPeriode('tout')">
+        Depuis le début
+      </button>
+    </div>
+
+    <div class="periode__dates">
+      <label for="d-depuis">Du</label>
+      <input id="d-depuis" type="date" [(ngModel)]="depuis" (change)="onDatePerso()" />
+      <label for="d-jusqua">au</label>
+      <input id="d-jusqua" type="date" [(ngModel)]="jusquA" (change)="onDatePerso()" />
+    </div>
+
+    <button type="button" class="btn btn--export" [disabled]="chargement" (click)="exporter()">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3v10m0 0 3.5-3.5M12 13 8.5 9.5" />
+        <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
+      </svg>
+      Exporter
+    </button>
+  </section>
+
+  <!-- ================= L'ÉQUIPE ================= -->
+  <section class="equipe" *ngIf="equipe.length">
+    <h2 class="titre-section">
+      L'équipe
+      <em
+        >{{ totaux.total | number: '1.0-0' }} action{{ totaux.total > 1 ? 's' : '' }} sur la
+        période</em
+      >
+    </h2>
+
+    <div class="cartes">
+      <button
+        type="button"
+        class="carte-membre"
+        *ngFor="let m of equipe; trackBy: trackMembre"
+        [class.is-selectionne]="filtreAuteur === m.id + ''"
+        (click)="filtrerSur(m.id)"
+      >
+        <span class="pastille-nom" [class.pastille-nom--chef]="m.role === 'responsable'">
+          {{ initiales(nomComplet(m)) }}
+        </span>
+
+        <span class="carte-membre__identite">
+          <strong>{{ nomComplet(m) }}</strong>
+          <em *ngIf="m.role === 'responsable'">responsable</em>
+          <span class="carte-membre__quand">{{ depuisQuand(m.derniere_action) }}</span>
+        </span>
+
+        <span class="carte-membre__chiffres" *ngIf="statsDe(m.id) as s">
+          <span class="chiffre-sec">
+            <b class="mono">{{ s.nb_actions }}</b>
+            <i>actions</i>
+          </span>
+          <span class="chiffre-sec" *ngIf="s.nb_commandes">
+            <b class="mono">{{ s.nb_commandes }}</b>
+            <i>commandes</i>
+          </span>
+          <span class="chiffre-sec chiffre-sec--alerte" *ngIf="s.nb_annulations">
+            <b class="mono">{{ s.nb_annulations }}</b>
+            <i>annulations</i>
+          </span>
+          <span class="chiffre-sec chiffre-sec--alerte" *ngIf="s.nb_suppressions">
+            <b class="mono">{{ s.nb_suppressions }}</b>
+            <i>suppressions</i>
+          </span>
+        </span>
+
+        <span class="carte-membre__vide" *ngIf="!statsDe(m.id)">
+          Aucune action sur cette période
+        </span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ================= FILTRES ================= -->
+  <section class="filtres">
+    <div class="filtres__champ filtres__champ--large">
+      <label for="f-recherche">Rechercher</label>
+      <div class="champ-loupe">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" />
+        </svg>
+        <input
+          id="f-recherche"
+          type="search"
+          placeholder="Une référence, un nom, un détail…"
+          [(ngModel)]="recherche"
+          (ngModelChange)="onRechercheChange()"
+        />
+      </div>
+    </div>
+
+    <div class="filtres__champ">
+      <label for="f-auteur">Gestionnaire</label>
+      <select id="f-auteur" [(ngModel)]="filtreAuteur" (ngModelChange)="rafraichirListe()">
+        <option value="">Tous</option>
+        <option *ngFor="let m of equipe" [value]="m.id">{{ nomComplet(m) }}</option>
+      </select>
+    </div>
+
+    <div class="filtres__champ">
+      <label for="f-type">Portée</label>
+      <select id="f-type" [(ngModel)]="filtreType" (ngModelChange)="rafraichirListe()">
+        <option value="">Tout</option>
+        <option *ngFor="let t of typesObjet" [value]="t.code">{{ t.libelle }}</option>
+      </select>
+    </div>
+
+    <div class="filtres__champ">
+      <label for="f-action">Action</label>
+      <select id="f-action" [(ngModel)]="filtreAction" (ngModelChange)="rafraichirListe()">
+        <option value="">Toutes</option>
+        <option *ngFor="let a of optionsActions" [value]="a.code">
+          {{ a.libelle }} ({{ a.nb }})
+        </option>
+      </select>
+    </div>
+
+    <button type="button" class="lien-reset" *ngIf="aDesFiltres" (click)="reinitialiser()">
+      Réinitialiser
+    </button>
+
+    <span class="filtres__compte">
+      {{ total | number: '1.0-0' }} résultat{{ total > 1 ? 's' : '' }}
+    </span>
+  </section>
+
+  <!-- ================= JOURNAL ================= -->
+  <section class="journal" *ngIf="actions.length; else journalVide">
+    <article
+      class="action"
+      *ngFor="let a of actions; trackBy: trackAction"
+      [class.is-depliee]="estDepliee(a)"
+    >
+      <div class="action__ligne">
+        <span
+          class="point"
+          [ngClass]="'point--' + familleAction(a.action)"
+          aria-hidden="true"
+        ></span>
+
+        <span class="action__heure mono">
+          {{ a.date_action | date: 'dd/MM/yy HH:mm' }}
+        </span>
+
+        <span class="pastille-nom pastille-nom--mini">{{ initiales(a.auteur_nom) }}</span>
+
+        <span class="action__texte">
+          {{ a.resume || a.auteur_nom + ' — ' + libelleAction(a.action) }}
+        </span>
+
+        <span class="etiquette etiquette--{{ familleAction(a.action) }}">
+          {{ a.objet_type }}
+        </span>
+
+        <button
+          type="button"
+          class="btn-detail"
+          *ngIf="aUnDetail(a)"
+          (click)="basculerDetail(a)"
+          [attr.aria-expanded]="estDepliee(a)"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+          Détail
+        </button>
+      </div>
+
+      <!-- Avant / après -->
+      <div class="detail" *ngIf="estDepliee(a)">
+        <table class="detail__table">
+          <thead>
+            <tr>
+              <th>Champ</th>
+              <th>Avant</th>
+              <th>Après</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of champsModifies(a)">
+              <td class="detail__champ">{{ c }}</td>
+              <td class="detail__avant">{{ valeur(a.avant, c) }}</td>
+              <td class="detail__apres">{{ valeur(a.apres, c) }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="detail__meta">
+          <span *ngIf="a.auteur_mail">{{ a.auteur_mail }}</span>
+          <span *ngIf="a.adresse_ip" class="mono">depuis {{ a.adresse_ip }}</span>
+          <span class="mono" *ngIf="a.objet_id">{{ a.objet_type }} #{{ a.objet_id }}</span>
+        </p>
+      </div>
+    </article>
+
+    <!-- Pagination -->
+    <nav class="pagination" *ngIf="pages > 1">
+      <button type="button" [disabled]="page === 1" (click)="allerPage(page - 1)">Précédent</button>
+      <span>Page {{ page }} sur {{ pages }}</span>
+      <button type="button" [disabled]="page === pages" (click)="allerPage(page + 1)">
+        Suivant
+      </button>
+    </nav>
+  </section>
+
+  <ng-template #journalVide>
+    <div class="vide">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+        <rect x="9" y="3" width="6" height="4" rx="1" />
+        <path d="M9 12h6M9 16h4" />
+      </svg>
+      <h3>{{ aDesFiltres ? 'Aucune action ne correspond' : 'Le journal est vide' }}</h3>
+      <p *ngIf="aDesFiltres">Élargissez la recherche ou réinitialisez les filtres.</p>
+      <p *ngIf="!aDesFiltres">Les actions des gestionnaires s'inscriront ici au fur et à mesure.</p>
+      <button
+        type="button"
+        class="btn btn--secondaire"
+        *ngIf="aDesFiltres"
+        (click)="reinitialiser()"
+      >
+        Réinitialiser les filtres
+      </button>
+    </div>
+  </ng-template>
+</div>

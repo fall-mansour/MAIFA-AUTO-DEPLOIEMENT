@@ -1,0 +1,1497 @@
+// ============================================================
+//  MAIFA-AUTO — AJOUT DE PIECE
+//  Palette du logo : bleu nuit #12314B + orange #F2762E
+//
+//  Repartition propre aux pages de gestion : le bleu nuit
+//  structure tout, l'orange est reserve aux actions decisives
+//  (publier la piece, ajouter un vehicule). Sur un ecran ou l'on
+//  passe du temps, un orange partout fatiguerait l'oeil.
+//
+//  Police : ajouter dans index.html ->
+//  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+// ============================================================
+
+// -- Bleu nuit : structure, titres, fonds --
+$navy-900: #081724;
+$navy-800: #0b1f30;
+$navy: #12314b; // couleur exacte du logo
+$navy-600: #1b4a6f;
+
+// -- Orange : actions decisives --
+// Le blanc sur orange ne donne que 2.84:1, insuffisant pour du petit
+// texte. Les boutons orange portent donc un texte bleu nuit (4.73:1).
+// $orange-700 est la seule nuance lisible en TEXTE sur blanc.
+$orange-700: #c25317;
+$orange-600: #d9631f;
+$orange: #f2762e; // couleur exacte du logo
+$orange-400: #ff9052;
+$orange-50: #fff4ed;
+
+// -- Alias conserves, pour ne rien casser dans le fichier --
+$blue: $navy;
+$blue-hi: $navy-600;
+$blue-deep: $navy-800;
+$sky: #e7eef5;
+$sky-soft: #f4f7fa;
+
+$page: #f6f8fb;
+$card: #ffffff;
+$line: #dfe5ee;
+$line-strong: #c3cddb;
+
+$text: $navy;
+$dim: #435a76;
+
+// Nuances calees sur le seuil de lisibilite AA (4.5:1 sur blanc) :
+// le gris clair habituel n'atteignait que 2.8:1
+$mute: #647489;
+$mute-light: #8d9bb0; // bordures et icones uniquement, jamais du texte
+
+$amber: #9e5f08; // alerte stock
+$green: #077f55;
+$red: #cc1f1f;
+
+$shadow-sm:
+  0 1px 2px rgba($navy, 0.06),
+  0 4px 14px rgba($navy, 0.07);
+$shadow-md: 0 8px 28px rgba($navy, 0.11);
+$shadow-blue: 0 6px 20px rgba($navy, 0.28);
+$shadow-orange: 0 6px 20px rgba($orange, 0.38);
+
+$r-sm: 10px;
+$r-md: 14px;
+$r-lg: 20px;
+
+// ===== HOTE =====
+:host {
+  display: block;
+  min-height: 100vh;
+  background: $page;
+  color: $text;
+  font-family: 'Barlow', 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+}
+
+.workspace {
+  max-width: 1340px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+// ===== BARRE HAUTE =====
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 0;
+  margin-bottom: 26px;
+  border-bottom: 1px solid $line;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  // Logo horizontal en PNG transparent : ni pastille ni bordure
+  &__logo {
+    height: 44px;
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    min-width: 0;
+    flex: 1;
+
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: $blue-deep;
+    }
+
+    p {
+      margin: 2px 0 0;
+      font-size: 0.9rem;
+      color: $mute;
+    }
+  }
+}
+
+// Jauge de completion
+.gauge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+
+  &__bar {
+    width: 120px;
+    height: 6px;
+    border-radius: 99px;
+    background: $sky;
+    overflow: hidden;
+
+    span {
+      display: block;
+      height: 100%;
+      width: 0;
+      border-radius: 99px;
+      background: linear-gradient(90deg, $orange-600, $orange);
+      transition: width 0.4s ease;
+    }
+  }
+
+  &__value {
+    font-size: 0.85rem;
+    color: $mute;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  // Formulaire complet : le vert signale que tout est pret
+  &--full &__bar span {
+    background: linear-gradient(90deg, $green, #12b981);
+  }
+}
+
+// ===== BOUTON PRINCIPAL =====
+.btn-publish {
+  flex-shrink: 0;
+  padding: 13px 28px;
+  border: 0;
+  border-radius: 99px; // pilule, comme le bouton Connexion du site
+  background: linear-gradient(135deg, $orange-600, $orange 60%, $orange-400);
+  color: $navy-900;
+  font-family: inherit;
+  font-size: 0.98rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: $shadow-orange;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba($orange, 0.5);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    background: $line-strong;
+    color: $mute;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  &--mobile {
+    display: none;
+    width: 100%;
+    padding: 16px;
+  }
+}
+
+// ===== GRILLE PRINCIPALE =====
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 372px;
+  gap: 24px;
+  align-items: start;
+}
+
+.col-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+// ===== PANNEAUX =====
+.panel {
+  padding: 26px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-lg;
+  box-shadow: $shadow-sm;
+
+  &__head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 14px;
+    align-items: center;
+    margin-bottom: 22px;
+
+    h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: $blue-deep;
+    }
+
+    p {
+      grid-column: 2;
+      margin: 3px 0 0;
+      font-size: 0.88rem;
+      color: $mute;
+    }
+  }
+
+  &__step {
+    grid-row: span 2;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, $navy-800, $navy-600);
+    color: #fff;
+    font-size: 0.92rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    box-shadow: 0 3px 10px rgba($navy, 0.3);
+  }
+}
+
+// ===== CHAMPS =====
+.fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.field {
+  min-width: 0;
+
+  &--wide {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: $dim;
+  }
+}
+
+input[type='text'],
+input[type='number'],
+select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 15px;
+  background: $sky-soft;
+  border: 1px solid $line;
+  border-radius: $r-md;
+  color: $text;
+  font-family: inherit;
+  font-size: 0.96rem;
+  outline: none;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+
+  &::placeholder {
+    color: $mute;
+  }
+
+  &:hover {
+    border-color: $line-strong;
+    background: #fff;
+  }
+
+  &:focus {
+    background: #fff;
+    border-color: $orange;
+    box-shadow: 0 0 0 4px rgba($orange, 0.15);
+  }
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  padding-right: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23435a76' d='M6 8L1.5 3.5h9z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+
+.input-unit {
+  position: relative;
+
+  input {
+    padding-right: 62px;
+  }
+
+  span {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $mute;
+    pointer-events: none;
+  }
+}
+
+// ===== SELECTEUR ETAT =====
+.segmented {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+  padding: 4px;
+  background: $sky-soft;
+  border: 1px solid $line;
+  border-radius: $r-md;
+
+  button {
+    padding: 9px 8px;
+    border: 0;
+    border-radius: $r-sm;
+    background: transparent;
+    color: $dim;
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background 0.18s ease,
+      color 0.18s ease,
+      box-shadow 0.18s ease;
+
+    &:hover {
+      color: $orange-700;
+    }
+
+    &.is-active {
+      background: #fff;
+      color: $orange-700;
+      box-shadow: 0 1px 4px rgba($navy, 0.14);
+    }
+  }
+}
+
+// ===== ZONES DE DEPOT =====
+.drop {
+  position: relative;
+  border: 1.5px dashed $line-strong;
+  border-radius: $r-md;
+  background: $sky-soft;
+  overflow: hidden;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+
+  input[type='file'] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+  }
+
+  > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &:hover,
+  &:focus-within {
+    border-color: $orange;
+    background: $orange-50;
+  }
+
+  // Fichier survolant la zone : signal franc
+  &.is-over {
+    border-style: solid;
+    border-color: $orange;
+    background: $orange-50;
+  }
+
+  &.is-filled {
+    border-style: solid;
+    border-color: $line;
+    background: #fff;
+  }
+
+  &__empty {
+    display: grid;
+    place-items: center;
+    gap: 6px;
+    height: 100%;
+    padding: 18px;
+    text-align: center;
+    color: $mute;
+    pointer-events: none;
+
+    svg {
+      width: 26px;
+      height: 26px;
+      fill: none;
+      stroke: $orange;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    strong {
+      color: $text;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    span {
+      font-size: 0.85rem;
+
+      em {
+        font-style: normal;
+        color: $orange-700;
+        font-weight: 700;
+        margin-left: 2px;
+      }
+    }
+  }
+
+  &--main {
+    aspect-ratio: 16 / 8;
+    margin-bottom: 12px;
+
+    .drop__empty svg {
+      width: 34px;
+      height: 34px;
+    }
+  }
+
+  &__tools {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.96));
+
+    button {
+      padding: 6px 14px;
+      border: 1px solid $line-strong;
+      border-radius: 99px;
+      background: #fff;
+      color: $dim;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease;
+
+      &:hover {
+        background: $red;
+        border-color: $red;
+        color: #fff;
+      }
+    }
+  }
+
+  &__name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $text;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__clear {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 1px solid $line;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    cursor: pointer;
+    opacity: 0;
+    box-shadow: 0 2px 6px rgba($navy, 0.18);
+    transition:
+      opacity 0.18s ease,
+      background 0.18s ease;
+
+    svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: $dim;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+    }
+
+    &:hover {
+      background: $red;
+      border-color: $red;
+
+      svg {
+        stroke: #fff;
+      }
+    }
+  }
+
+  &.is-filled:hover .drop__clear,
+  .drop__clear:focus-visible {
+    opacity: 1;
+  }
+}
+
+.drop-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+
+  .drop {
+    aspect-ratio: 1;
+  }
+}
+
+// ===== APERCU CATALOGUE =====
+.col-preview {
+  position: sticky;
+  top: 104px;
+  min-width: 0;
+}
+
+.preview {
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-lg;
+  overflow: hidden;
+  box-shadow: $shadow-md;
+
+  &__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 15px 20px;
+    background: linear-gradient(120deg, $navy-800, $navy-600);
+    color: #fff;
+
+    h2 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    span {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  &__body {
+    padding: 18px 20px 22px;
+
+    h3 {
+      margin: 0;
+      font-size: 1.22rem;
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.015em;
+      color: $blue-deep;
+    }
+  }
+
+  &__vehicle {
+    margin: 4px 0 0;
+    font-size: 0.92rem;
+    color: $dim;
+
+    em {
+      font-style: normal;
+      color: $mute;
+    }
+  }
+
+  &__price {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: 16px 0 18px;
+
+    // Prix en orange : c'est le chiffre que le client verra en premier
+    strong {
+      font-size: 1.9rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: $orange-700;
+    }
+
+    span {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: $dim;
+    }
+  }
+}
+
+// scene image principale
+.stage {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: $sky-soft;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &__empty {
+    display: grid;
+    place-items: center;
+    gap: 10px;
+    height: 100%;
+    color: $mute;
+
+    svg {
+      width: 36px;
+      height: 36px;
+      fill: none;
+      stroke: $mute-light;
+      stroke-width: 1.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+  }
+
+  &__tag {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 5px 13px;
+    border-radius: 99px;
+    background: #fff;
+    color: $navy;
+    font-size: 0.82rem;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba($navy, 0.18);
+  }
+}
+
+// bande de vignettes
+.strip {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  border-bottom: 1px solid $line;
+  overflow-x: auto;
+
+  button {
+    flex: 0 0 auto;
+    width: 54px;
+    height: 54px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: $r-sm;
+    background: $sky-soft;
+    overflow: hidden;
+    cursor: pointer;
+    opacity: 0.7;
+    transition:
+      opacity 0.18s ease,
+      border-color 0.18s ease;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &.is-active {
+      opacity: 1;
+      border-color: $orange;
+    }
+  }
+}
+
+// caracteristiques
+.specs {
+  margin: 0;
+  border-top: 1px solid $line;
+
+  > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid $line;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  dt {
+    font-size: 0.88rem;
+    color: $mute;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &.is-low {
+      color: $amber;
+    }
+  }
+}
+
+// ===== ACCESSIBILITE =====
+:focus-visible {
+  outline: 2px solid $orange;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+// ===== TABLETTE / PETIT PORTABLE (< 1100px) =====
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .col-preview {
+    position: static;
+    order: -1;
+  }
+
+  .stage {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+// ===== MOBILE (< 768px) =====
+@media (max-width: 767px) {
+  .workspace {
+    padding: 0 14px 40px;
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 0;
+
+    &__logo {
+      height: 40px;
+    }
+
+    &__title h1 {
+      font-size: 1.25rem;
+    }
+
+    &__title p {
+      display: none;
+    }
+  }
+
+  .gauge {
+    order: 3;
+    width: 100%;
+
+    &__bar {
+      flex: 1;
+      width: auto;
+    }
+  }
+
+  .topbar .btn-publish {
+    display: none;
+  }
+
+  .btn-publish--mobile {
+    display: block;
+  }
+
+  .panel {
+    padding: 20px 16px;
+    border-radius: $r-md;
+  }
+
+  .fields {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .drop-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .drop--main {
+    aspect-ratio: 4 / 3;
+  }
+
+  .drop__clear {
+    opacity: 1; // pas de survol au doigt
+  }
+
+  .preview__price strong {
+    font-size: 1.6rem;
+  }
+}
+
+// ============================================================
+//  VEHICULES COMPATIBLES
+// ============================================================
+
+// Ligne de sélection : marque, modèle, années, motorisation, bouton
+.compat-form {
+  display: grid;
+  grid-template-columns: 1.2fr 1.4fr 0.8fr 0.8fr 1.2fr auto;
+  gap: 12px;
+  align-items: end;
+  padding: 16px;
+  background: $sky-soft;
+  border: 1px solid $line;
+  border-radius: $r-md;
+
+  .field--small select {
+    padding-right: 30px;
+  }
+
+  // Le modele reste inerte tant qu'aucune marque n'est choisie
+  select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: $page;
+    color: $mute;
+  }
+}
+
+.btn-add-compat {
+  height: 44px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: $r-md;
+  background: linear-gradient(135deg, $orange-600, $orange);
+  color: $navy-900;
+  font-family: inherit;
+  font-size: 0.94rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: $shadow-orange;
+  }
+
+  &:disabled {
+    background: $line-strong;
+    color: $mute;
+    cursor: not-allowed;
+  }
+}
+
+// Véhicules retenus
+.compat-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.compat-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 9px 9px 15px;
+  background: $orange-50;
+  border: 1px solid rgba($orange, 0.28);
+  border-radius: 99px;
+
+  &__text {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: $dim;
+
+    strong {
+      color: $blue-deep;
+      font-weight: 700;
+    }
+  }
+
+  button {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    transition: background 0.18s ease;
+
+    svg {
+      width: 11px;
+      height: 11px;
+      fill: none;
+      stroke: $dim;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+    }
+
+    &:hover {
+      background: $red;
+
+      svg {
+        stroke: #fff;
+      }
+    }
+  }
+}
+
+.compat-empty {
+  margin: 16px 0 0;
+  padding: 14px 16px;
+  border-radius: $r-md;
+  background: rgba($amber, 0.08);
+  border: 1px solid rgba($amber, 0.28);
+  color: $amber;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 1100px) {
+  .compat-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    .btn-add-compat {
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .compat-form {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 14px;
+  }
+}
+
+//vin
+
+// ============================================================
+//  MAIFA-AUTO — AJOUT DE PIECE : RATTACHEMENT PAR CONFIGURATION
+//
+//  A COLLER A LA FIN DE src/app/Gestion/ajoutpieces/ajoutpieces.scss
+//
+//  Rien a retirer du fichier existant. Ce bloc complete la section
+//  « VEHICULES COMPATIBLES » et redefinit UNIQUEMENT la grille de
+//  .compat-form, qui passe de six a sept elements.
+//
+//  Toutes les couleurs viennent de tes variables, declarees en
+//  haut du fichier. Ce bloc n'en introduit aucune.
+//
+//  Rappel de ton en-tete : $mute-light est reserve aux bordures et
+//  aux icones, jamais a du texte. Il n'est utilise ici que pour
+//  des bordures.
+// ============================================================
+
+// ------------------------------------------------------------
+//  GRILLE DE SAISIE, SEPT ELEMENTS
+//
+//  Quatre colonnes. La version occupe les deux dernieres de la
+//  premiere ligne, ce qui remplit exactement les deux rangees :
+//
+//      marque   modele   version .......
+//      de       a        motorisation   Ajouter
+//
+//  Aucun ordre DOM a changer : la repartition tombe juste avec le
+//  seul span pose sur .field--version.
+// ------------------------------------------------------------
+.compat-form {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  .field--version {
+    grid-column: span 2;
+  }
+
+  // Le bouton occupe la derniere cellule, aligne sur les champs
+  .btn-add-compat {
+    width: 100%;
+  }
+
+  // Un champ neutralise doit le DIRE, pas seulement etre inerte :
+  // la motorisation libre se grise des qu'une version est choisie,
+  // parce que la version porte deja cette information.
+  input:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background: $page;
+    color: $mute;
+  }
+}
+
+// Compteur discret accole au libelle « Version »
+.field--version label em {
+  margin-left: 7px;
+  padding: 1px 7px;
+  border-radius: 99px;
+  background: $sky;
+  color: $dim;
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  vertical-align: 1px;
+}
+
+// Precision sous un champ, en gris lisible (4.5:1)
+.field__hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.79rem;
+  line-height: 1.35;
+  color: $mute;
+}
+
+// ------------------------------------------------------------
+//  BANDEAU DES VEHICULES CLIENTS
+//
+//  En bleu nuit et non en orange : c'est une information, pas une
+//  action decisive. L'orange reste reserve a Publier et Ajouter.
+// ------------------------------------------------------------
+.clients-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding: 12px 16px;
+  border: 1px solid rgba($navy-600, 0.22);
+  border-radius: $r-md;
+  background: linear-gradient(120deg, rgba($navy-600, 0.07), rgba($navy-600, 0.03));
+
+  &__text {
+    min-width: 0;
+    font-size: 0.9rem;
+    color: $dim;
+
+    strong {
+      color: $blue-deep;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    // Les orphelines : signalees en ambre, pas en rouge. Ce n'est
+    // pas une erreur, c'est une liste de travail.
+    em {
+      font-style: normal;
+      font-weight: 600;
+      color: $amber;
+    }
+  }
+}
+
+.btn-ghost {
+  flex-shrink: 0;
+  padding: 8px 18px;
+  border: 1px solid $line-strong;
+  border-radius: 99px;
+  background: #fff;
+  color: $navy-600;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+
+  &:hover {
+    background: $navy;
+    border-color: $navy;
+    color: #fff;
+  }
+}
+
+// ------------------------------------------------------------
+//  LISTE DEPLIABLE
+//
+//  Hauteur plafonnee : au bout de quelques mois le parc compte
+//  des dizaines de configurations, et une liste sans fin
+//  repousserait le formulaire hors de l'ecran.
+// ------------------------------------------------------------
+.clients-panel {
+  max-height: 340px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  border: 1px solid $line;
+  border-radius: $r-md;
+  background: #fff;
+}
+
+.clients-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 16px;
+  border-bottom: 1px solid $line;
+
+  &:last-of-type {
+    border-bottom: 0;
+  }
+
+  &:hover {
+    background: $sky-soft;
+  }
+
+  &__who {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    strong {
+      font-size: 0.94rem;
+      font-weight: 700;
+      color: $blue-deep;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    span {
+      font-size: 0.84rem;
+      color: $mute;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  // Le nombre de clients est l'information commerciale de l'ecran :
+  // elle dit quoi stocker. Mise en valeur a partir de trois.
+  &__count {
+    flex-shrink: 0;
+    padding: 4px 11px;
+    border-radius: 99px;
+    background: $sky;
+    color: $dim;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+
+    &.is-hot {
+      background: rgba($orange, 0.16);
+      color: $orange-700;
+    }
+  }
+}
+
+.clients-panel__note {
+  margin: 0;
+  padding: 13px 16px;
+  border-top: 1px solid $line;
+  background: rgba($amber, 0.07);
+  color: $amber;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.btn-attach {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border: 1px solid rgba($orange, 0.5);
+  border-radius: 99px;
+  background: #fff;
+  color: $orange-700;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
+
+  &:hover:not(:disabled) {
+    background: $orange;
+    border-color: $orange;
+    color: $navy-900;
+  }
+
+  &:disabled {
+    border-color: $line;
+    background: $sky-soft;
+    color: $mute;
+    cursor: default;
+  }
+}
+
+// ------------------------------------------------------------
+//  NUMERO DE CHASSIS, REPLIE PAR DEFAUT
+//
+//  Replie parce que le gestionnaire n'a generalement pas le
+//  vehicule devant lui. Le deplier est un geste volontaire, pour
+//  les trois cas ou il a vraiment un numero.
+// ------------------------------------------------------------
+.vin-box {
+  margin-bottom: 14px;
+  border: 1px dashed $line-strong;
+  border-radius: $r-md;
+  background: $sky-soft;
+
+  > summary {
+    padding: 12px 16px;
+    color: $navy-600;
+    font-size: 0.89rem;
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    // Chevron dessine en CSS : pas d'icone a charger
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin-right: 10px;
+      border-right: 2px solid $orange;
+      border-bottom: 2px solid $orange;
+      transform: rotate(-45deg) translate(-1px, -1px);
+      transition: transform 0.2s ease;
+    }
+
+    &:hover {
+      color: $orange-700;
+    }
+  }
+
+  &[open] > summary::before {
+    transform: rotate(45deg) translate(-2px, -2px);
+  }
+
+  &[open] > summary {
+    border-bottom: 1px solid $line;
+  }
+
+  &__why {
+    margin: 0;
+    padding: 12px 16px 0;
+    font-size: 0.84rem;
+    line-height: 1.45;
+    color: $mute;
+  }
+
+  &__row {
+    display: flex;
+    gap: 10px;
+    padding: 12px 16px 16px;
+
+    input {
+      flex: 1;
+      min-width: 0;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: #fff;
+    }
+
+    .btn-add-compat {
+      flex: 0 0 auto;
+      width: auto;
+    }
+  }
+
+  &__msg {
+    margin: 0;
+    padding: 0 16px 16px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: $green;
+
+    &.is-error {
+      color: $amber;
+    }
+  }
+}
+
+// ------------------------------------------------------------
+//  PUCES DES VEHICULES RETENUS
+//
+//  Deux natures visuellement distinctes. Une compatibilite large
+//  reste parfaitement legitime pour une piece universelle : la
+//  puce precise est marquee, la large n'est pas devaluee.
+// ------------------------------------------------------------
+.compat-chip--precise {
+  background: #fff;
+  border-color: rgba($navy-600, 0.32);
+  box-shadow: inset 3px 0 0 $navy-600;
+  padding-left: 17px;
+}
+
+.compat-chip__version {
+  padding: 2px 9px;
+  border-radius: 99px;
+  background: rgba($navy-600, 0.1);
+  color: $navy-600;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.compat-note {
+  margin: 12px 0 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: $mute;
+}
+
+// ------------------------------------------------------------
+//  TABLETTE ET PETIT PORTABLE
+// ------------------------------------------------------------
+@media (max-width: 1100px) {
+  .compat-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    // La version prend toute la largeur : son libelle est le plus
+    // long de la grille (motorisation, carburant, annees, nombre
+    // de clients) et se tronquerait sur une demi-colonne.
+    .field--version {
+      grid-column: 1 / -1;
+    }
+
+    //      marque   modele
+    //      version .........
+    //      de       a
+    //      moteur   Ajouter
+    //
+    // Le bouton reprend sa place normale : en pleine largeur il
+    // consommait une rangee entiere et laissait un trou a cote de
+    // la motorisation.
+    .btn-add-compat {
+      grid-column: auto;
+    }
+  }
+}
+
+// ------------------------------------------------------------
+//  MOBILE
+// ------------------------------------------------------------
+@media (max-width: 767px) {
+  .compat-form {
+    grid-template-columns: minmax(0, 1fr);
+
+    .field--version {
+      grid-column: auto;
+    }
+  }
+
+  .clients-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+
+    .btn-ghost {
+      width: 100%;
+    }
+  }
+
+  // Au doigt, trois colonnes serrees deviennent illisibles :
+  // le bouton passe sous le libelle, en pleine largeur.
+  .clients-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 10px;
+
+    .btn-attach {
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+  }
+
+  .vin-box__row {
+    flex-direction: column;
+
+    .btn-add-compat {
+      width: 100%;
+    }
+  }
+}

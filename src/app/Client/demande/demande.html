@@ -1,0 +1,195 @@
+<div class="demande-container">
+  <div class="form-card">
+    <!-- ================= EN-TÊTE ================= -->
+    <header class="form-header">
+      <span class="form-header__badge">Pièce introuvable ?</span>
+      <h1>Faites une demande de pièce</h1>
+      <p>Dites-nous ce qu'il vous faut, notre équipe la recherche pour vous.</p>
+      <p class="form-header__slogan">Weur ba soon diekhna !</p>
+    </header>
+
+    <form (ngSubmit)="onSendDemande()" #demandeForm="ngForm" novalidate>
+      <!-- ================= VÉHICULE ================= -->
+      <section class="section">
+        <h2 class="section__titre">
+          <span class="section__num">1</span>
+          Votre véhicule
+        </h2>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="marque">Marque</label>
+            <select
+              id="marque"
+              [(ngModel)]="demande.marque"
+              name="marque"
+              (change)="onMarqueChange()"
+              required
+            >
+              <option value="">Choisir une marque</option>
+              <option *ngFor="let m of marques" [value]="m">{{ m }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="modele">Modèle</label>
+            <select
+              id="modele"
+              [(ngModel)]="demande.modele"
+              name="modele"
+              [disabled]="!demande.marque"
+              required
+            >
+              <option value="">
+                {{ demande.marque ? 'Choisir un modèle' : 'Choisissez une marque' }}
+              </option>
+              <option *ngFor="let mod of modelesFiltr" [value]="mod">{{ mod }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="annee">Année</label>
+            <select id="annee" [(ngModel)]="demande.annee" name="annee" required>
+              <option value="">Année</option>
+              <option *ngFor="let year of annees" [value]="year">{{ year }}</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PIÈCE RECHERCHÉE ================= -->
+      <section class="section">
+        <h2 class="section__titre">
+          <span class="section__num">2</span>
+          La pièce recherchée
+        </h2>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea
+            id="description"
+            [(ngModel)]="demande.description"
+            name="description"
+            rows="5"
+            placeholder="Ex. : phare avant gauche pour Peugeot 308, version LED. Référence si vous l'avez."
+            required
+            minlength="10"
+            #descCtrl="ngModel"
+          ></textarea>
+          <p class="aide" *ngIf="descCtrl.invalid && descCtrl.touched">
+            Décrivez la pièce en quelques mots, 10 caractères minimum.
+          </p>
+          <p class="aide aide--discret" *ngIf="!(descCtrl.invalid && descCtrl.touched)">
+            Plus vous êtes précis (référence, côté, version), plus vite nous trouvons.
+          </p>
+        </div>
+      </section>
+
+      <!-- ================= COORDONNÉES ================= -->
+      <section class="section">
+        <h2 class="section__titre">
+          <span class="section__num">3</span>
+          Vos coordonnées
+          <span class="section__pre" *ngIf="estConnecte">pré-remplies depuis votre compte</span>
+        </h2>
+
+        <div class="form-grid form-grid--2">
+          <div class="form-group form-group--large">
+            <label for="nom">Nom complet</label>
+            <input
+              id="nom"
+              type="text"
+              [(ngModel)]="demande.nom"
+              name="nom"
+              placeholder="Amadou Diop"
+              autocomplete="name"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="telephone">Téléphone</label>
+            <input
+              id="telephone"
+              type="tel"
+              [(ngModel)]="demande.telephone"
+              name="telephone"
+              placeholder="77 123 45 67"
+              autocomplete="tel"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              [(ngModel)]="demande.email"
+              name="email"
+              placeholder="vous@exemple.com"
+              autocomplete="email"
+              email
+            />
+          </div>
+        </div>
+
+        <p class="aide aide--discret" [class.aide--alerte]="!contactRenseigne && demandeForm.submitted">
+          Indiquez au moins un téléphone ou un email, pour que nous puissions vous répondre.
+        </p>
+      </section>
+
+      <!-- ================= ENVOI ================= -->
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn-submit"
+          [disabled]="!demandeForm.form.valid || !contactRenseigne || isLoading"
+        >
+          <span class="spin" *ngIf="isLoading"></span>
+          {{ isLoading ? 'Envoi en cours…' : 'Envoyer la demande' }}
+        </button>
+
+        <p class="form-actions__alt">
+          Plus rapide ?
+          <a [href]="lienWhatsApp" target="_blank" rel="noopener">Écrivez-nous sur WhatsApp</a>
+        </p>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= NOTIFICATIONS ================= -->
+<div class="message-container" aria-live="polite">
+  <div class="alert-box success" *ngIf="successMessage">
+    <span class="icon">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+    </span>
+    <div class="content">
+      <p><strong>Demande envoyée</strong></p>
+      <p>Merci, notre équipe revient vers vous au plus vite.</p>
+    </div>
+    <button type="button" (click)="successMessage = ''" class="close-btn" aria-label="Fermer">
+      &times;
+    </button>
+  </div>
+
+  <div class="alert-box error" *ngIf="errorMessage">
+    <span class="icon">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 8v4m0 4h.01" />
+      </svg>
+    </span>
+    <div class="content">
+      <p><strong>Envoi impossible</strong></p>
+      <p>{{ errorMessage }}</p>
+    </div>
+    <button type="button" (click)="errorMessage = ''" class="close-btn" aria-label="Fermer">
+      &times;
+    </button>
+  </div>
+</div>
+
+<app-boutons-flottants
+  [message]="'Bonjour MAIFA-AUTO, je recherche une pièce pour mon véhicule.'"
+></app-boutons-flottants>

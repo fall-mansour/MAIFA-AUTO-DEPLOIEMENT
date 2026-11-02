@@ -1,0 +1,2369 @@
+// ============================================================
+//  MAIFA-AUTO — STOCK
+//  Palette du logo : bleu nuit #12314B + orange #F2762E
+//
+//  Repartition propre aux pages de gestion : le bleu nuit
+//  structure, l'orange signale ce qui demande une action
+//  (ajouter une piece, reapprovisionner, retirer du stock).
+// ============================================================
+
+// -- Bleu nuit : structure, titres, fonds --
+$navy-900: #081724;
+$navy-800: #0b1f30;
+$navy: #12314b; // couleur exacte du logo
+$navy-600: #1b4a6f;
+$navy-400: #3f80b0;
+
+// -- Orange : actions et points chauds --
+// Le blanc sur orange ne donne que 2.84:1, insuffisant pour du petit
+// texte. Les boutons orange portent donc un texte bleu nuit (4.73:1).
+// $orange-700 est lisible en TEXTE sur blanc, $orange-800 sur aplat clair.
+$orange-800: #a8480f;
+$orange-700: #c25317;
+$orange-600: #d9631f;
+$orange: #f2762e; // couleur exacte du logo
+$orange-400: #ff9052;
+$orange-50: #fff4ed;
+
+// -- Alias conserves, pour ne rien casser dans le fichier --
+$blue: $navy;
+$blue-hi: $navy-600;
+$blue-deep: $navy-800;
+$sky: #e7eef5;
+$sky-soft: #f4f7fa;
+
+$page: #f6f8fb;
+$card: #ffffff;
+$line: #dfe5ee;
+$line-strong: #c3cddb;
+
+$text: $navy;
+$dim: #435a76;
+
+// Nuances calees sur le seuil de lisibilite AA (4.5:1 sur blanc) :
+// le gris clair habituel n'atteignait que 2.8:1
+$mute: #647489;
+$mute-light: #8d9bb0; // bordures et icones uniquement, jamais du texte
+
+$green: #077f55;
+$amber: #9e5f08;
+$red: #cc1f1f;
+
+$shadow-sm:
+  0 1px 2px rgba($navy, 0.06),
+  0 4px 14px rgba($navy, 0.07);
+$shadow-md: 0 10px 30px rgba($navy, 0.12);
+$shadow-orange: 0 6px 20px rgba($orange, 0.38);
+
+$r-sm: 10px;
+$r-md: 14px;
+$r-lg: 20px;
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: $page;
+  color: $text;
+  font-family: 'Barlow', 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+}
+
+.ta-right {
+  text-align: right;
+}
+
+.page {
+  max-width: 1340px;
+  margin: 0 auto;
+  padding: 24px 24px 64px;
+}
+
+// ===== BARRE HAUTE =====
+.entete {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 24px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid $line;
+
+  // Logo horizontal en PNG transparent : ni pastille ni bordure
+  .logo {
+    height: 44px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  &__title {
+    flex-shrink: 0;
+
+    h1 {
+      margin: 0;
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: $blue-deep;
+    }
+
+    p {
+      margin: 1px 0 0;
+      font-size: 0.86rem;
+      color: $mute;
+    }
+  }
+}
+
+.search {
+  position: relative;
+  flex: 1;
+  max-width: 460px;
+  margin-left: auto;
+
+  svg {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: $mute;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    border: 1px solid $line;
+    border-radius: 99px;
+    background: $sky-soft;
+    color: $text;
+    font-family: inherit;
+    font-size: 0.95rem;
+    outline: none;
+    transition:
+      border-color 0.18s ease,
+      box-shadow 0.18s ease,
+      background 0.18s ease;
+
+    &::placeholder {
+      color: $mute;
+    }
+
+    &:focus {
+      background: #fff;
+      border-color: $orange;
+      box-shadow: 0 0 0 4px rgba($orange, 0.15);
+    }
+  }
+}
+
+// ===== BOUTON AJOUTER =====
+.btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 12px 22px;
+  border: 0;
+  border-radius: 99px;
+  background: linear-gradient(135deg, $orange-600, $orange 60%, $orange-400);
+  color: $navy-900;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: $shadow-orange;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba($orange, 0.5);
+  }
+}
+
+// ===== CHIFFRES CLÉS =====
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.kpi {
+  padding: 16px 18px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-md;
+  box-shadow: $shadow-sm;
+
+  &__label {
+    display: block;
+    font-size: 0.85rem;
+    color: $mute;
+    margin-bottom: 4px;
+  }
+
+  &__value {
+    display: block;
+    font-size: 1.7rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: $blue-deep;
+
+    em {
+      font-style: normal;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: $mute;
+      margin-left: 5px;
+    }
+  }
+
+  // A reapprovisionner : l'orange signale ce qui demande une action
+  &--alert {
+    border-color: rgba($orange, 0.4);
+    background: $orange-50;
+
+    .kpi__value {
+      color: $orange-800;
+    }
+  }
+}
+
+// ===== FILTRES =====
+.filters {
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-lg;
+  box-shadow: $shadow-sm;
+
+  &__row {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+
+    &--tools {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid $line;
+    }
+  }
+
+  &__field {
+    min-width: 0;
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: $dim;
+    }
+  }
+
+  &__count {
+    margin-left: auto;
+    font-size: 0.88rem;
+    color: $mute;
+    font-variant-numeric: tabular-nums;
+  }
+
+  select,
+  input[type='text'] {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid $line;
+    border-radius: $r-md;
+    background: $sky-soft;
+    color: $text;
+    font-family: inherit;
+    font-size: 0.94rem;
+    outline: none;
+    transition:
+      border-color 0.18s ease,
+      box-shadow 0.18s ease,
+      background 0.18s ease;
+
+    &::placeholder {
+      color: $mute;
+    }
+
+    &:hover {
+      border-color: $line-strong;
+      background: #fff;
+    }
+
+    &:focus {
+      background: #fff;
+      border-color: $orange;
+      box-shadow: 0 0 0 4px rgba($orange, 0.15);
+    }
+  }
+
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23435a76' d='M6 8L1.5 3.5h9z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 13px center;
+  }
+}
+
+// bascule "stock faible"
+.toggle {
+  padding: 9px 18px;
+  border: 1px solid $line-strong;
+  border-radius: 99px;
+  background: #fff;
+  color: $dim;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+
+  &:hover {
+    border-color: $orange;
+    color: $orange-700;
+  }
+
+  &.is-on {
+    background: $orange-50;
+    border-color: rgba($orange, 0.5);
+    color: $orange-800;
+  }
+}
+
+.link-reset {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: $orange-700;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+// bascule grille / tableau
+.viewswitch {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: $sky-soft;
+  border: 1px solid $line;
+  border-radius: 99px;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 16px;
+    border: 0;
+    border-radius: 99px;
+    background: transparent;
+    color: $dim;
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+
+    svg {
+      width: 15px;
+      height: 15px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+    }
+
+    &.is-active {
+      background: #fff;
+      color: $orange-700;
+      box-shadow: 0 1px 4px rgba($navy, 0.14);
+    }
+  }
+}
+
+// ===== GRILLE DE CARTES =====
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(288px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-lg;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: rgba($orange, 0.32);
+    box-shadow: $shadow-md;
+  }
+
+  &__media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: $sky-soft;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__desc {
+    margin: 4px 0 0;
+    font-size: 0.9rem;
+    color: $dim;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid $line;
+
+    button {
+      padding: 8px 16px;
+      border: 1px solid $line-strong;
+      border-radius: 99px;
+      background: #fff;
+      color: $dim;
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+
+      &:hover {
+        background: $red;
+        border-color: $red;
+        color: #fff;
+      }
+    }
+  }
+}
+
+.badge {
+  position: absolute;
+  top: 10px;
+  padding: 4px 11px;
+  border-radius: 99px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 8px rgba($navy, 0.18);
+
+  &--ref {
+    left: 10px;
+    color: $orange-700;
+    letter-spacing: 0.02em;
+  }
+
+  &--etat {
+    right: 10px;
+    color: $dim;
+  }
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 16px 18px 18px;
+
+  h3 {
+    margin: 0;
+    font-size: 1.08rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: $blue-deep;
+  }
+}
+
+// ligne de stock coloree
+.stockline {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 0.88rem;
+  color: $dim;
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    align-self: center;
+  }
+
+  strong {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  &.is-ok {
+    color: $green;
+  }
+  &.is-faible {
+    color: $amber;
+  }
+  &.is-rupture {
+    color: $red;
+  }
+}
+
+.meta {
+  margin: 14px 0 0;
+
+  > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 5px 0;
+  }
+
+  dt {
+    font-size: 0.85rem;
+    color: $mute;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.87rem;
+    font-weight: 600;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.price {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: $navy;
+
+  em {
+    font-style: normal;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $mute;
+    margin-left: 4px;
+  }
+}
+
+// ===== TABLEAU =====
+.table-wrap {
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-lg;
+  box-shadow: $shadow-sm;
+  overflow: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 860px;
+
+  th {
+    padding: 13px 16px;
+    background: $sky-soft;
+    border-bottom: 1px solid $line;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: $dim;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid $line;
+    font-size: 0.92rem;
+    vertical-align: middle;
+  }
+
+  tbody tr {
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: $sky-soft;
+    }
+
+    &:last-child td {
+      border-bottom: 0;
+    }
+  }
+
+  .th-img {
+    width: 66px;
+    padding-right: 0;
+
+    img {
+      width: 50px;
+      height: 50px;
+      border-radius: $r-sm;
+      object-fit: cover;
+      background: $sky-soft;
+      display: block;
+    }
+  }
+
+  .cell-ref {
+    font-weight: 700;
+    color: $orange-700;
+    white-space: nowrap;
+  }
+
+  .cell-sub {
+    display: block;
+    font-size: 0.82rem;
+    color: $mute;
+  }
+
+  strong {
+    font-weight: 600;
+  }
+}
+
+.tag {
+  display: inline-block;
+  padding: 3px 11px;
+  border-radius: 99px;
+  background: $sky;
+  color: $navy;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pill {
+  display: inline-block;
+  min-width: 44px;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-align: center;
+
+  &.is-ok {
+    background: rgba($green, 0.12);
+    color: $green;
+  }
+  &.is-faible {
+    background: rgba($amber, 0.14);
+    color: $amber;
+  }
+  &.is-rupture {
+    background: rgba($red, 0.12);
+    color: $red;
+  }
+}
+
+.btn-del {
+  padding: 7px 15px;
+  border: 1px solid $line-strong;
+  border-radius: 99px;
+  background: #fff;
+  color: $dim;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+
+  &:hover {
+    background: $red;
+    border-color: $red;
+    color: #fff;
+  }
+}
+
+// ===== ÉTAT VIDE =====
+.empty {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  padding: 70px 24px;
+  background: $card;
+  border: 1px dashed $line-strong;
+  border-radius: $r-lg;
+  text-align: center;
+
+  svg {
+    width: 40px;
+    height: 40px;
+    fill: none;
+    stroke: $mute-light;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+
+  h3 {
+    margin: 6px 0 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: $blue-deep;
+  }
+
+  p {
+    margin: 0;
+    color: $mute;
+  }
+
+  .btn-add {
+    margin-top: 12px;
+  }
+}
+
+// ===== ACCESSIBILITÉ =====
+:focus-visible {
+  outline: 2px solid $orange;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// ===== TABLETTE =====
+@media (max-width: 1100px) {
+  .filters__row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+// ===== MOBILE =====
+@media (max-width: 767px) {
+  .entete {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 14px;
+
+    .logo {
+      height: 40px;
+    }
+
+    &__title h1 {
+      font-size: 1.2rem;
+    }
+
+    &__title p {
+      display: none;
+    }
+  }
+
+  .search {
+    order: 3;
+    max-width: 100%;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .btn-add {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
+
+  .page {
+    padding: 16px 14px 48px;
+  }
+
+  .kpis {
+    gap: 10px;
+  }
+
+  .kpi {
+    padding: 12px 14px;
+
+    &__value {
+      font-size: 1.35rem;
+    }
+  }
+
+  .filters {
+    padding: 14px;
+  }
+
+  .filters__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .filters__count {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .viewswitch {
+    width: 100%;
+
+    button {
+      flex: 1;
+      justify-content: center;
+    }
+  }
+
+  .container {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+// ============================================================
+//  À COLLER À LA FIN DE stock.scss
+//  Véhicules compatibles, bannière d'alerte, cellules tableau
+// ============================================================
+
+// Bannière : pièces absentes du catalogue client
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  background: $orange-50;
+  border: 1px solid rgba($orange, 0.4);
+  border-radius: $r-md;
+
+  svg {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: $orange-700;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  div {
+    flex: 1;
+    min-width: 0;
+
+    strong {
+      display: block;
+      font-size: 0.95rem;
+      color: $orange-800;
+    }
+
+    span {
+      font-size: 0.87rem;
+      color: $dim;
+    }
+  }
+
+  button {
+    flex-shrink: 0;
+    padding: 8px 18px;
+    border: 1px solid rgba($orange, 0.5);
+    border-radius: 99px;
+    background: #fff;
+    color: $orange-800;
+    font-family: inherit;
+    font-size: 0.87rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background 0.18s ease,
+      color 0.18s ease;
+
+    &:hover {
+      background: $orange-700;
+      color: #fff;
+    }
+  }
+}
+
+// Véhicules compatibles sur les cartes
+.vehicules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.veh-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: 99px;
+  background: $sky;
+  color: $navy;
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  em {
+    font-style: normal;
+    font-weight: 400;
+    color: $dim;
+  }
+
+  // Piece non rattachee : invisible du catalogue client
+  &--warn {
+    background: $orange-50;
+    color: $orange-800;
+  }
+}
+
+.veh-more {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: #eef2f9;
+  color: $dim;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+// Cellules du tableau
+.cell-warn {
+  color: $orange-800;
+  font-size: 0.87rem;
+  font-weight: 600;
+}
+
+.table .cell-ref .cell-sub {
+  font-weight: 400;
+  color: $mute;
+}
+
+@media (max-width: 767px) {
+  .banner {
+    flex-wrap: wrap;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+// ============================================================
+//  AJUSTEMENT RAPIDE DU STOCK
+// ============================================================
+.stockline {
+  justify-content: space-between;
+
+  &__label {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.compteur {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid $line;
+  border-radius: 99px;
+  background: $sky-soft;
+  transition: opacity 0.15s ease;
+
+  button {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    color: $orange-700;
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      transform 0.1s ease;
+
+    &:hover:not(:disabled) {
+      background: $orange-50;
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.9);
+    }
+
+    &:disabled {
+      color: $mute-light;
+      background: transparent;
+      cursor: not-allowed;
+    }
+  }
+
+  strong {
+    min-width: 30px;
+    text-align: center;
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: $navy-800;
+  }
+
+  // Enregistrement en cours : leger estompage, sans bloquer la lecture
+  &.is-encours {
+    opacity: 0.6;
+  }
+
+  // Version tableau : la couleur du chiffre reprend l'etat du stock
+  &--table {
+    &.is-rupture strong {
+      color: $red;
+    }
+    &.is-faible strong {
+      color: $orange-800;
+    }
+    &.is-ok strong {
+      color: $green;
+    }
+  }
+}
+
+// Piece retiree du catalogue client
+.badge--masque {
+  top: auto;
+  bottom: 10px;
+  left: 10px;
+  color: $mute;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+// ============================================================
+//  BOUTONS D'ACTION DES CARTES ET DU TABLEAU
+// ============================================================
+.card__actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-edit {
+  padding: 8px 15px;
+  border: 1px solid $line-strong;
+  border-radius: 99px;
+  background: #fff;
+  color: $navy;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+
+  &:hover {
+    border-color: $orange;
+    background: $orange-50;
+    color: $orange-800;
+  }
+}
+
+.cell-actions {
+  white-space: nowrap;
+
+  .btn-edit {
+    margin-right: 6px;
+  }
+}
+
+// ============================================================
+//  FENETRE D'EDITION
+// ============================================================
+.modale {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba($navy-900, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: modaleFond 0.2s ease;
+
+  &__boite {
+    width: 100%;
+    max-width: 620px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    background: #fff;
+    border-radius: $r-lg;
+    box-shadow: 0 24px 60px rgba($navy-900, 0.3);
+    animation: modaleEntree 0.25s cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+
+  &__tete {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px 16px;
+    background: #fff;
+    border-bottom: 1px solid $line;
+
+    h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: $navy-800;
+    }
+
+    p {
+      margin: 3px 0 0;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: $orange-700;
+    }
+  }
+
+  &__fermer {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border: 1px solid $line;
+    border-radius: 50%;
+    background: #fff;
+    color: $dim;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      border-color: $red;
+      background: rgba($red, 0.06);
+      color: $red;
+    }
+  }
+
+  &__corps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px 24px 22px;
+  }
+
+  &__erreur {
+    margin: 0;
+    padding: 11px 14px;
+    border-radius: $r-md;
+    background: rgba($red, 0.07);
+    border: 1px solid rgba($red, 0.28);
+    color: $red;
+    font-size: 0.88rem;
+  }
+
+  &__pied {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 16px;
+    border-top: 1px solid $line;
+  }
+}
+
+@keyframes modaleFond {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modaleEntree {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// Champs de la fenetre
+.champ {
+  min-width: 0;
+
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.83rem;
+    font-weight: 700;
+    color: $dim;
+  }
+
+  input[type='text'],
+  input[type='number'] {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid $line;
+    border-radius: $r-md;
+    background: $sky-soft;
+    color: $text;
+    font-family: inherit;
+    font-size: 0.94rem;
+    outline: none;
+    transition: all 0.18s ease;
+
+    &:hover {
+      border-color: $line-strong;
+      background: #fff;
+    }
+
+    &:focus {
+      background: #fff;
+      border-color: $orange;
+      box-shadow: 0 0 0 4px rgba($orange, 0.15);
+    }
+  }
+
+  input[type='number'] {
+    -moz-appearance: textfield;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+}
+
+.grille-2,
+.grille-3 {
+  display: grid;
+  gap: 14px;
+}
+
+.grille-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grille-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.avec-unite {
+  position: relative;
+
+  input {
+    padding-right: 58px !important;
+  }
+
+  span {
+    position: absolute;
+    right: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: $mute;
+    pointer-events: none;
+  }
+}
+
+// Selecteur d'etat
+.segments {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+  padding: 4px;
+  background: $sky-soft;
+  border: 1px solid $line;
+  border-radius: $r-md;
+
+  button {
+    padding: 9px 8px;
+    border: 0;
+    border-radius: $r-sm;
+    background: transparent;
+    color: $dim;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      color: $orange-700;
+    }
+
+    &.is-active {
+      background: #fff;
+      color: $orange-700;
+      box-shadow: 0 1px 4px rgba($navy, 0.14);
+    }
+  }
+}
+
+// Interrupteur de visibilite
+.bascule {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid $line;
+  border-radius: $r-md;
+  background: $sky-soft;
+  cursor: pointer;
+
+  input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__piste {
+    position: relative;
+    flex-shrink: 0;
+    width: 40px;
+    height: 22px;
+    margin-top: 1px;
+    border-radius: 99px;
+    background: $line-strong;
+    transition: background 0.2s ease;
+
+    span {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba($navy, 0.3);
+      transition: transform 0.2s ease;
+    }
+  }
+
+  input:checked + &__piste {
+    background: $green;
+
+    span {
+      transform: translateX(18px);
+    }
+  }
+
+  input:focus-visible + &__piste {
+    outline: 2px solid $orange;
+    outline-offset: 2px;
+  }
+
+  &__texte {
+    b {
+      display: block;
+      font-size: 0.92rem;
+      color: $navy-800;
+    }
+
+    em {
+      font-style: normal;
+      font-size: 0.82rem;
+      color: $mute;
+    }
+  }
+}
+
+.btn-annuler {
+  padding: 12px 22px;
+  border: 1px solid $line-strong;
+  border-radius: 99px;
+  background: #fff;
+  color: $dim;
+  font-family: inherit;
+  font-size: 0.93rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: $navy;
+    color: $navy;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.modale__pied .btn-add:disabled {
+  background: $line;
+  color: $mute;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.spin {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba($navy-900, 0.25);
+  border-top-color: $navy-900;
+  border-radius: 50%;
+  animation: tourner 0.7s linear infinite;
+}
+
+@keyframes tourner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ============================================================
+//  NOTIFICATION
+// ============================================================
+.notif {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  z-index: 300;
+  padding: 12px 22px;
+  border-radius: 99px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba($navy-900, 0.25);
+  transform: translateX(-50%);
+  animation: notifEntree 0.25s ease;
+
+  &.is-ok {
+    background: $navy-800;
+    color: #fff;
+  }
+
+  &.is-ko {
+    background: $red;
+    color: #fff;
+  }
+}
+
+@keyframes notifEntree {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (max-width: 767px) {
+  .grille-2,
+  .grille-3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .modale {
+    padding: 0;
+    align-items: end;
+
+    // Sur telephone, la fenetre monte depuis le bas, comme un tiroir
+    &__boite {
+      max-width: none;
+      max-height: 92vh;
+      border-radius: $r-lg $r-lg 0 0;
+    }
+  }
+
+  .modale__pied {
+    flex-direction: column-reverse;
+
+    button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .card__foot {
+    flex-wrap: wrap;
+  }
+}
+
+// ============================================================
+//  BOUTON DE SUPPRESSION
+//  Icone rouge visible en permanence : l'ancien libelle gris
+//  « Retirer » se fondait dans la carte.
+// ============================================================
+.btn-poubelle {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1px solid rgba($red, 0.35);
+  border-radius: 50%;
+  background: rgba($red, 0.06);
+  color: $red;
+  cursor: pointer;
+  vertical-align: middle;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.12s ease;
+
+  svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  // Survol : le bouton se remplit, l'action devient franche
+  &:hover {
+    background: $red;
+    border-color: $red;
+    color: #fff;
+  }
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $red;
+    outline-offset: 2px;
+  }
+}
+
+// Le style generique des boutons de pied de carte ne doit pas
+// s'appliquer a la poubelle, qui a sa propre forme ronde
+.card__foot .btn-poubelle {
+  padding: 0;
+  border-radius: 50%;
+}
+
+.card__actions {
+  align-items: center;
+}
+
+.cell-actions {
+  .btn-edit,
+  .btn-poubelle {
+    vertical-align: middle;
+  }
+}
+
+// ============================================================
+//  ACTIONS DE L'EN-TÊTE
+//  Deux entrées côte à côte : l'ajout unitaire garde l'orange
+//  plein, l'ajout multiple reste en retrait. Un seul geste
+//  principal par page.
+// ============================================================
+.entete__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-multi {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 12px 20px;
+  border: 1px solid $line-strong;
+  border-radius: 99px;
+  background: #fff;
+  color: $navy;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+
+  svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  &:hover {
+    border-color: $orange;
+    background: $orange-50;
+    color: $orange-800;
+    transform: translateY(-2px);
+  }
+}
+
+@media (max-width: 1100px) {
+  // Sur écran moyen, l'icône suffit : le libellé long passe
+  // devant la recherche sinon
+  .btn-multi {
+    padding: 12px 14px;
+
+    span {
+      display: none;
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  // La recherche passe sur sa propre ligne, les boutons
+  // reprennent l'alignement à droite
+  .entete__actions {
+    margin-left: auto;
+  }
+
+  .btn-multi {
+    padding: 10px 13px;
+  }
+}
+
+// ============================================================
+//  BROUILLONS, PHOTOS ET VÉHICULES COMPATIBLES
+//
+//  Une pièce n'est trouvable par un client que si elle réunit
+//  trois conditions : au moins une photo, au moins un véhicule
+//  rattaché, et du stock. Les deux premières se règlent ici.
+// ============================================================
+
+// ---- Bandeau « pièces sans photo » -------------------------
+//
+// Volontairement BLEU, alors que le bandeau « sans véhicule »
+// est orange. Les deux cohabitent en haut de la page et un même
+// traitement les rendrait indiscernables : on lirait deux fois
+// la même alerte sans voir qu'elles portent sur deux manques
+// différents.
+.banner--photo {
+  background: $sky-soft;
+  border-color: $line-strong;
+
+  svg {
+    stroke: $navy-600;
+  }
+
+  div strong {
+    color: $navy-800;
+  }
+
+  button {
+    border-color: $line-strong;
+    color: $navy;
+
+    &:hover {
+      background: $navy;
+      border-color: $navy;
+      color: #fff;
+    }
+  }
+}
+
+// ---- Compteur sur la bascule « Sans photo » ----------------
+.toggle__compte {
+  display: inline-block;
+  margin-left: 7px;
+  padding: 1px 7px;
+  border-radius: 99px;
+  background: rgba($navy, 0.1);
+  font-size: 0.72rem;
+  font-weight: 800;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.toggle.is-on .toggle__compte {
+  background: rgba($orange, 0.22);
+}
+
+// ---- Badge « Sans photo » sur la vignette ------------------
+//
+// En bas à gauche, et non en haut : .badge pose « top: 10px »
+// sans valeur horizontale, le badge se serait donc superposé à
+// la référence. C'est la place de .badge--masque, et les deux
+// ne s'affichent jamais ensemble : une pièce sans photo est
+// signalée comme telle, pas comme masquée.
+.badge--brouillon {
+  top: auto;
+  bottom: 10px;
+  left: 10px;
+  background: $orange-700;
+  color: #fff;
+}
+
+// Vignette d'un brouillon : c'est le logo par défaut, on
+// l'estompe pour qu'il ne se lise pas comme une photo de la pièce
+.card__media.is-brouillon img,
+.th-img__btn.is-brouillon img {
+  opacity: 0.32;
+  filter: grayscale(1);
+}
+
+// ---- Bouton appareil photo sur la vignette -----------------
+.btn-photo {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border: 0;
+  border-radius: 99px;
+  background: rgba($navy-900, 0.78);
+  color: #fff;
+  font-family: inherit;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  em {
+    font-size: 0.72rem;
+    font-weight: 800;
+    font-style: normal;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // Texte bleu nuit sur orange, comme les autres boutons orange
+  // de la page : le blanc n'y atteint que 2.84:1
+  &:hover {
+    background: $orange;
+    color: $navy-900;
+  }
+}
+
+// ---- Vignette cliquable dans la vue tableau ----------------
+.th-img__btn {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+
+  img {
+    display: block;
+    border-radius: $r-sm;
+  }
+
+  &:hover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: $r-sm;
+    border: 2px solid $orange;
+  }
+}
+
+.th-img__badge {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  min-width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  padding: 0 4px;
+  border-radius: 99px;
+  background: $navy;
+  color: #fff;
+  font-size: 0.64rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+// ---- Véhicules compatibles sur les cartes ------------------
+.vehicules {
+  align-items: center;
+}
+
+.veh-gerer {
+  display: inline-grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  padding: 0;
+  border: 1px dashed $line-strong;
+  border-radius: 50%;
+  background: none;
+  color: $mute;
+  cursor: pointer;
+  transition: all 0.18s ease;
+
+  svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+  }
+
+  &:hover {
+    border-style: solid;
+    border-color: $orange;
+    background: $orange-50;
+    color: $orange-800;
+  }
+}
+
+// La puce « aucun véhicule » devient le bouton qui y remédie :
+// l'avertissement et l'action au même endroit
+.veh-chip--action {
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.18s ease;
+
+  svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    align-self: center;
+  }
+
+  &:hover {
+    background: $orange-700;
+    color: #fff;
+  }
+}
+
+// ---- Cellule véhicules du tableau --------------------------
+.cell-veh {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: $r-sm;
+  transition: box-shadow 0.15s ease;
+
+  &:hover {
+    box-shadow: 0 0 0 6px $sky-soft;
+    background: $sky-soft;
+  }
+}
+
+// ============================================================
+//  SÉLECTEURS DANS LES FENÊTRES
+//
+//  .champ ne stylait que les input text et number. Les fenêtres
+//  photos et véhicules utilisent des <select>, qui seraient
+//  restés aux réglages par défaut du navigateur, sans rapport
+//  avec le reste de la page.
+// ============================================================
+.champ select {
+  width: 100%;
+  padding: 11px 36px 11px 14px;
+  border: 1px solid $line;
+  border-radius: $r-md;
+  background: $sky-soft;
+  color: $text;
+  font-family: inherit;
+  font-size: 0.94rem;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23435a76' d='M6 8L1.5 3.5h9z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  transition: all 0.18s ease;
+
+  &:hover:not(:disabled) {
+    border-color: $line-strong;
+    background-color: #fff;
+  }
+
+  &:focus {
+    background-color: #fff;
+    border-color: $orange;
+    box-shadow: 0 0 0 4px rgba($orange, 0.15);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Champ en lecture seule : la référence interne, affichée mais
+// jamais modifiable. $dim et non $mute, qui ne donne que 4.33:1
+// sur ce fond et passe sous le seuil AA.
+.champ input[readonly],
+.champ input:disabled {
+  background: #eef2f7;
+  color: $dim;
+  cursor: not-allowed;
+
+  &:hover {
+    border-color: $line;
+    background: #eef2f7;
+  }
+}
+
+// $mute et non $mute-light : ton en-tête le dit, $mute-light est
+// réservé aux bordures et aux icônes, il ne tient pas 4.5:1 en texte.
+.champ__aide {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: $mute;
+}
+
+// ============================================================
+//  PIED DES FENÊTRES SANS FORMULAIRE
+//
+//  Dans la fenêtre d'édition, .modale__pied vit DANS le <form
+//  class="modale__corps"> et hérite de son padding horizontal.
+//  Les fenêtres photos et véhicules le placent à côté du corps :
+//  sans cette règle, le bouton Fermer collerait au bord.
+// ============================================================
+.modale__boite > .modale__pied {
+  padding: 16px 24px 22px;
+}
+
+// ============================================================
+//  FENÊTRE DES PHOTOS
+// ============================================================
+.modale__boite--photos {
+  max-width: 640px;
+}
+
+// .modale__corps est une colonne flex avec gap 16 : les marges
+// de ses enfants s'ajouteraient à cet écart.
+.photos__note,
+.photos__grille,
+.photos__compte,
+.photos__aide,
+.photos__envoi,
+.veh__note,
+.veh__liste,
+.veh__compte,
+.veh__aide {
+  margin: 0;
+}
+
+.photos__note,
+.veh__note {
+  padding: 12px 15px;
+  border-radius: $r-md;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: $dim;
+}
+
+.photos__note {
+  background: $orange-50;
+  border: 1px solid rgba($orange, 0.4);
+}
+
+.veh__note {
+  background: rgba($red, 0.06);
+  border: 1px solid rgba($red, 0.25);
+}
+
+.photos__grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 10px;
+}
+
+.photos__item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: $r-md;
+  overflow: hidden;
+  background: $sky-soft;
+  border: 1px solid $line;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  figcaption {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    padding: 4px 8px;
+    background: rgba($navy-900, 0.8);
+    color: #fff;
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+}
+
+.photos__retirer,
+.veh__retirer {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  svg {
+    width: 13px;
+    height: 13px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.3;
+    stroke-linecap: round;
+  }
+
+  &:hover:not(:disabled) {
+    background: $red;
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.photos__retirer {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba($navy-900, 0.78);
+  color: #fff;
+}
+
+.photos__compte,
+.veh__compte {
+  font-size: 0.86rem;
+  color: $mute;
+}
+
+.photos__ajout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.photos__bouton {
+  position: relative;
+  flex: 1 1 200px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 14px 18px;
+  border: 1px dashed $line-strong;
+  border-radius: $r-md;
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.93rem;
+  font-weight: 700;
+  color: $navy;
+  cursor: pointer;
+  transition: all 0.18s ease;
+
+  // Le champ réel est invisible : c'est l'étiquette qu'on clique
+  input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  svg {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  &:hover {
+    border-style: solid;
+    border-color: $orange;
+    background: $orange-50;
+    color: $orange-800;
+  }
+
+  &.is-off {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+// Le geste au magasin : la pièce arrive, on la photographie
+.photos__bouton--camera {
+  border-style: solid;
+  border-color: $navy;
+  background: $navy;
+  color: #fff;
+
+  &:hover {
+    border-color: $navy-900;
+    background: $navy-900;
+    color: #fff;
+  }
+}
+
+.photos__aide,
+.veh__aide {
+  font-size: 0.8rem;
+  color: $mute;
+}
+
+.photos__envoi {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: $navy;
+}
+
+// ============================================================
+//  FENÊTRE DES VÉHICULES
+// ============================================================
+.modale__boite--vehicules {
+  max-width: 660px;
+}
+
+.veh__liste {
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: $sky-soft;
+    border: 1px solid $line;
+    border-radius: $r-md;
+  }
+}
+
+.veh__texte {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 3px 10px;
+
+  strong {
+    font-size: 0.94rem;
+    font-weight: 700;
+    color: $navy-800;
+  }
+
+  span {
+    font-size: 0.82rem;
+    color: $mute;
+  }
+}
+
+.veh__retirer {
+  background: $sky;
+  color: $dim;
+}
+
+.veh__form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 16px;
+  border: 1px dashed $line-strong;
+  border-radius: $r-md;
+
+  // La motorisation est le dernier champ : seule sur une
+  // demi-ligne elle laisserait un trou, donc elle prend la largeur
+  > .champ:last-of-type {
+    grid-column: 1 / -1;
+  }
+}
+
+.veh__ajouter {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 12px 22px;
+  border: 0;
+  border-radius: 99px;
+  background: $navy;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.93rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+
+  &:hover:not(:disabled) {
+    background: $navy-900;
+  }
+
+  &:disabled {
+    background: $line;
+    color: $mute;
+    cursor: not-allowed;
+  }
+
+  .spin {
+    border-color: rgba(#fff, 0.3);
+    border-top-color: #fff;
+  }
+}
+
+// ============================================================
+//  TÉLÉPHONE
+//  Même seuil que le reste du fichier, et non un seuil à part
+// ============================================================
+@media (max-width: 767px) {
+  .photos__grille {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .photos__ajout {
+    flex-direction: column;
+  }
+
+  // En colonne, flex-basis s'applique à la HAUTEUR : sans cette
+  // remise à zéro chaque bouton occuperait un tiers de l'écran
+  .photos__bouton {
+    flex: 0 0 auto;
+  }
+
+  // Au magasin, l'appareil photo passe devant le choix de fichiers
+  .photos__bouton--camera {
+    order: -1;
+  }
+
+  // Marque, modèle et motorisation en pleine largeur ; les deux
+  // années restent côte à côte, elles se lisent comme une plage
+  .veh__form {
+    padding: 14px;
+
+    > .champ:not(.champ--court) {
+      grid-column: 1 / -1;
+    }
+  }
+}

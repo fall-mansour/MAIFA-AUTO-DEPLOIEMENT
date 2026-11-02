@@ -1,0 +1,926 @@
+// ============================================================
+//  MAIFA-AUTO — FICHE PIÈCE
+//  Palette du logo : bleu nuit #12314B + orange #F2762E
+// ============================================================
+
+// --- Bleu nuit : structure, titres, fonds ---
+$navy-900: #081724;
+$navy-800: #0b1f30;
+$navy: #12314b; // couleur exacte du logo
+$navy-600: #1b4a6f;
+$navy-400: #3f80b0;
+
+// --- Orange : action, points chauds ---
+// Le blanc sur orange ne donne que 2.84:1, insuffisant pour du petit
+// texte. Les boutons orange portent donc un texte bleu nuit (4.73:1).
+// $orange-700 est la seule nuance lisible en TEXTE sur blanc.
+$orange-700: #c25317;
+$orange-600: #d9631f;
+$orange: #f2762e; // couleur exacte du logo
+$orange-400: #ff9052;
+$orange-50: #fff4ed;
+
+// --- Alias conserves, pour ne rien casser dans le fichier ---
+$blue: $navy;
+$blue-hi: $navy-600;
+$blue-deep: $navy-800;
+$sky: #e7eef5;
+$sky-soft: #f4f7fa;
+
+$page: #f6f8fb;
+$card: #ffffff;
+$line: #dfe5ee;
+$line-strong: #c3cddb;
+
+$text: $navy;
+$dim: #435a76;
+
+// Nuances calees sur le seuil de lisibilite AA (4.5:1 sur blanc) :
+// le gris clair habituel n'atteignait que 2.8:1
+$mute: #647489;
+$mute-light: #8d9bb0; // bordures et icones uniquement, jamais du texte
+
+$green: #077f55;
+$amber: #a96608;
+$red: #e02424;
+
+$shadow-sm:
+  0 1px 2px rgba($navy, 0.06),
+  0 4px 14px rgba($navy, 0.07);
+$shadow-md: 0 10px 30px rgba($navy, 0.12);
+$shadow-orange: 0 6px 20px rgba($orange, 0.38);
+
+$r-sm: 10px;
+$r-md: 14px;
+$r-lg: 20px;
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: $page;
+  color: $text;
+  font-family: 'Barlow', 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+}
+
+.fiche {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 20px 24px 64px;
+}
+
+// ===== FIL D'ARIANE =====
+.ariane {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 0.88rem;
+  color: $mute;
+
+  a {
+    color: $dim;
+    text-decoration: none;
+    text-transform: capitalize;
+
+    &:hover {
+      color: $orange-700;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+
+  strong {
+    color: $text;
+    font-weight: 600;
+  }
+}
+
+// ===== HAUT DE FICHE =====
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) 340px;
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 18px;
+}
+
+// --- Galerie ---
+.galerie {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 12px;
+
+  &__vignettes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    button {
+      padding: 0;
+      aspect-ratio: 1;
+      border: 2px solid $line;
+      border-radius: $r-sm;
+      background: $card;
+      overflow: hidden;
+      cursor: pointer;
+      transition:
+        border-color 0.18s ease,
+        transform 0.18s ease;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      &:hover {
+        transform: translateY(-2px);
+      }
+
+      &.is-active {
+        border-color: $orange;
+      }
+    }
+  }
+
+  &__scene {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: $card;
+    border: 1px solid $line;
+    border-radius: $r-lg;
+    overflow: hidden;
+    cursor: zoom-in;
+    box-shadow: $shadow-sm;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: transform 0.35s ease;
+    }
+
+    &.is-zoom {
+      cursor: zoom-out;
+
+      img {
+        transform: scale(1.9);
+      }
+    }
+  }
+
+  &__hint {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    padding: 5px 12px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid $line;
+    font-size: 0.78rem;
+    color: $dim;
+    pointer-events: none;
+  }
+}
+
+.etat-tag {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 5px 13px;
+  border-radius: 99px;
+  background: $blue;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+// --- Colonne achat ---
+.achat {
+  position: sticky;
+  top: 20px;
+  padding: 24px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-lg;
+  box-shadow: $shadow-md;
+
+  &__cat {
+    margin: 0 0 6px;
+    font-size: 0.83rem;
+    font-weight: 700;
+    color: $orange-700;
+    text-transform: capitalize;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    color: $blue-deep;
+  }
+
+  &__ref {
+    margin: 8px 0 0;
+    font-size: 0.88rem;
+    color: $mute;
+  }
+
+  // Prix en bleu nuit, bouton en orange : un seul point chaud
+  // dans la colonne, qui indique clairement l'action
+  &__prix {
+    margin: 18px 0 14px;
+    font-size: 2.1rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: $navy;
+
+    em {
+      font-style: normal;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: $dim;
+      margin-left: 6px;
+    }
+  }
+}
+
+// Disponibilité
+.dispo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 14px;
+  margin-bottom: 18px;
+  border-radius: $r-md;
+  font-size: 0.89rem;
+
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
+  b {
+    font-weight: 700;
+  }
+
+  &.is-stock {
+    background: rgba($green, 0.09);
+    color: $green;
+  }
+
+  &.is-dernieres {
+    background: rgba($amber, 0.11);
+    color: $amber;
+  }
+
+  &.is-commande {
+    background: $sky;
+    color: $blue;
+  }
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 99px;
+  background: linear-gradient(135deg, $orange-600, $orange 60%, $orange-400);
+  color: $navy-900;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: $shadow-orange;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+
+  svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba($orange, 0.5);
+  }
+}
+
+.btn-ghost {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid $line-strong;
+  border-radius: 99px;
+  background: $card;
+  color: $dim;
+  font-family: inherit;
+  font-size: 0.94rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.18s ease;
+
+  &:hover {
+    border-color: $orange;
+    color: $orange-700;
+  }
+}
+
+// ============================================================
+//  AJOUT AU PANIER
+// ============================================================
+
+// Le bouton devient un <button> : on neutralise les styles natifs
+button.btn-primary {
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+
+  &:disabled {
+    background: $line-strong;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+// ===== SÉLECTEUR DE QUANTITÉ =====
+.qte {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+
+  &__label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: $dim;
+  }
+
+  &__controle {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 4px;
+    background: $sky-soft;
+    border: 1px solid $line;
+    border-radius: 99px;
+
+    button {
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 50%;
+      background: #fff;
+      color: $orange-700;
+      font-family: inherit;
+      font-size: 1.1rem;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.15s ease;
+
+      &:hover:not(:disabled) {
+        background: $orange-50;
+      }
+
+      &:disabled {
+        color: $mute;
+        background: transparent;
+        cursor: not-allowed;
+      }
+    }
+
+    span {
+      min-width: 30px;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+  }
+
+  // Pièce en un seul exemplaire
+  &__unique {
+    margin: 0 0 14px;
+    padding: 9px 14px;
+    border-radius: $r-md;
+    background: rgba($amber, 0.1);
+    color: $amber;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+  }
+}
+
+// ===== CONFIRMATION D'AJOUT =====
+.ajout-ok {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 12px;
+  padding: 11px 14px;
+  border-radius: $r-md;
+  background: rgba($green, 0.09);
+  border: 1px solid rgba($green, 0.3);
+  font-size: 0.89rem;
+  color: $green;
+  animation: apparition 0.25s ease;
+
+  svg {
+    flex-shrink: 0;
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  span {
+    flex: 1;
+    font-weight: 600;
+  }
+
+  a {
+    color: $green;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    white-space: nowrap;
+  }
+}
+
+@keyframes apparition {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ajout-erreur {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border-radius: $r-md;
+  background: rgba($red, 0.07);
+  border: 1px solid rgba($red, 0.28);
+  color: $red;
+  font-size: 0.86rem;
+}
+
+// Rappel du contenu du panier
+.deja-panier {
+  margin: 12px 0 0;
+  font-size: 0.85rem;
+  color: $mute;
+  text-align: center;
+
+  a {
+    color: $orange-700;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+// Note affichée sur une pièce en rupture
+.rupture-note {
+  margin: 12px 0 0;
+  font-size: 0.85rem;
+  color: $mute;
+  line-height: 1.45;
+}
+
+.reassure {
+  margin: 18px 0 0;
+  padding: 16px 0 0;
+  border-top: 1px solid $line;
+  list-style: none;
+
+  li {
+    padding: 4px 0;
+    font-size: 0.86rem;
+    color: $mute;
+
+    b {
+      color: $text;
+      font-weight: 600;
+    }
+  }
+}
+
+// ===== BLOCS =====
+.bloc {
+  padding: 24px;
+  margin-bottom: 18px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-lg;
+  box-shadow: $shadow-sm;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 18px;
+    font-size: 1.12rem;
+    font-weight: 700;
+    color: $blue-deep;
+
+    svg {
+      width: 21px;
+      height: 21px;
+      fill: none;
+      stroke: $orange;
+      stroke-width: 1.7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+  }
+
+  &__note {
+    margin: 16px 0 0;
+    padding-top: 14px;
+    border-top: 1px solid $line;
+    font-size: 0.85rem;
+    color: $mute;
+  }
+
+  // Bloc compatibilité : mis en avant, c'est l'info numero un
+  &--compat {
+    border-color: rgba($blue, 0.22);
+    background: linear-gradient(180deg, $sky-soft, $card 60%);
+  }
+}
+
+.deux-cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+// ===== COMPATIBILITÉS =====
+.compat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+}
+
+.compat-item {
+  padding: 13px 16px;
+  background: $card;
+  border: 1px solid rgba($blue, 0.2);
+  border-radius: $r-md;
+
+  strong {
+    display: block;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: $blue-deep;
+  }
+
+  span {
+    font-size: 0.86rem;
+    color: $dim;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__moteur {
+    display: block;
+    margin-top: 2px;
+    color: $mute !important;
+    font-size: 0.82rem !important;
+  }
+}
+
+// ===== CARACTÉRISTIQUES =====
+.specs {
+  margin: 0;
+
+  > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 9px 0;
+    border-bottom: 1px solid $line;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  dt {
+    font-size: 0.89rem;
+    color: $mute;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-align: right;
+    text-transform: capitalize;
+  }
+}
+
+// ===== RÉFÉRENCES =====
+.refs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid $line;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  &__type {
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: #eef2f9;
+    color: $dim;
+
+    &.is-OE {
+      background: rgba($blue, 0.12);
+      color: $blue;
+    }
+
+    &.is-equivalent {
+      background: rgba($green, 0.12);
+      color: $green;
+    }
+  }
+
+  &__num {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: $text;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__fab {
+    font-size: 0.83rem;
+    color: $mute;
+  }
+}
+
+// ===== CARTES DE REBOND =====
+.cartes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(172px, 1fr));
+  gap: 14px;
+}
+
+.carte {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-md;
+  text-decoration: none;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: rgba($orange, 0.35);
+    box-shadow: $shadow-md;
+  }
+
+  &__img {
+    aspect-ratio: 4 / 3;
+    margin-bottom: 10px;
+    border-radius: $r-sm;
+    background: $sky-soft;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  &__nom {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $text;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__ref {
+    margin-top: 3px;
+    font-size: 0.78rem;
+    color: $mute;
+  }
+
+  &__prix {
+    margin-top: 8px;
+    font-size: 1.02rem;
+    font-weight: 800;
+    color: $navy;
+    letter-spacing: -0.02em;
+  }
+
+  &__stock {
+    margin-top: 4px;
+    font-size: 0.78rem;
+    color: $green;
+    font-weight: 600;
+
+    &.is-out {
+      color: $mute;
+    }
+  }
+}
+
+// ===== CHARGEMENT / ERREUR =====
+.loader,
+.erreur {
+  display: grid;
+  place-items: center;
+  gap: 14px;
+  min-height: 60vh;
+  padding: 24px;
+  text-align: center;
+  color: $mute;
+
+  h1 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: $blue-deep;
+  }
+
+  p {
+    margin: 0;
+    max-width: 420px;
+  }
+
+  svg {
+    width: 44px;
+    height: 44px;
+    fill: none;
+    stroke: $mute-light;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+
+  .btn-primary {
+    width: auto;
+    padding: 12px 28px;
+    margin-top: 8px;
+  }
+
+  &__spin {
+    width: 34px;
+    height: 34px;
+    border: 3px solid $line;
+    border-top-color: $orange;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+:focus-visible {
+  outline: 2px solid $orange;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+// ===== TABLETTE =====
+@media (max-width: 980px) {
+  .head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .achat {
+    position: static;
+  }
+
+  .deux-cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+// ===== MOBILE =====
+@media (max-width: 767px) {
+  .fiche {
+    padding: 14px 14px 48px;
+  }
+
+  // Vignettes en bande horizontale sous la photo
+  .galerie {
+    grid-template-columns: minmax(0, 1fr);
+
+    &__scene {
+      grid-row: 1;
+    }
+
+    &__vignettes {
+      grid-row: 2;
+      flex-direction: row;
+      overflow-x: auto;
+      padding-bottom: 4px;
+
+      button {
+        flex: 0 0 62px;
+      }
+    }
+  }
+
+  .achat {
+    padding: 18px;
+
+    h1 {
+      font-size: 1.25rem;
+    }
+
+    &__prix {
+      font-size: 1.75rem;
+    }
+  }
+
+  .bloc {
+    padding: 18px 16px;
+  }
+
+  .compat-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cartes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+}

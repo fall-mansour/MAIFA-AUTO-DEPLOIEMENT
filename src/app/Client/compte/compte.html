@@ -1,0 +1,360 @@
+<div class="auth">
+  <!-- ================= PANNEAU DE MARQUE ================= -->
+  <aside class="vitrine">
+    <div class="vitrine__contenu">
+      <img src="/assets/logo-horizontal-blanc.png" alt="MAIFA-AUTO" class="vitrine__logo" />
+
+      <h2>Créez votre compte en une minute</h2>
+      <p class="vitrine__accroche">
+        Retrouvez vos commandes, gagnez du temps à chaque achat et recevez nos arrivages.
+      </p>
+
+      <ul class="atouts">
+        <li>
+          <span class="atouts__puce">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+          </span>
+          <span>
+            <b>Vos informations pré-remplies</b>
+            Plus besoin de ressaisir vos coordonnées à chaque commande
+          </span>
+        </li>
+        <li>
+          <span class="atouts__puce">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+          </span>
+          <span>
+            <b>Suivi de vos commandes</b>
+            Consultez l'état de vos achats à tout moment
+          </span>
+        </li>
+        <li>
+          <span class="atouts__puce">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+          </span>
+          <span>
+            <b>Paiement en ligne</b>
+            Wave et Orange Money, réservés aux comptes clients
+          </span>
+        </li>
+      </ul>
+    </div>
+
+    <p class="vitrine__pied">Rufisque, Rue Ousmane Socé Diop</p>
+  </aside>
+
+  <!-- ================= FORMULAIRE ================= -->
+  <main class="panneau">
+    <div class="panneau__boite">
+      <img src="/assets/logo-horizontal.png" alt="MAIFA-AUTO" class="panneau__logo" />
+
+      <header class="panneau__tete">
+        <h1>Créer un compte</h1>
+        <p>Quelques informations suffisent pour commencer</p>
+      </header>
+
+      <!-- Google en premier : qui choisit cette voie n'a pas à lire la suite -->
+      <app-bouton-google
+        texte="signup_with"
+        [separateur]="false"
+        (connecte)="apresGoogle($event)"
+      ></app-bouton-google>
+
+      <div class="separateur"><span>ou renseignez vos informations</span></div>
+
+      <form (ngSubmit)="creerCompte()" #compteForm="ngForm" novalidate>
+        <!-- ===== IDENTITÉ ===== -->
+        <section class="section">
+          <h2 class="section__titre">Identité</h2>
+
+          <div class="grille grille--2">
+            <div class="champ">
+              <label for="prenom">Prénom</label>
+              <input
+                id="prenom"
+                type="text"
+                placeholder="Amadou"
+                autocomplete="given-name"
+                [(ngModel)]="prenom"
+                name="prenom"
+                #prenomCtrl="ngModel"
+                required
+              />
+              <p class="champ__erreur" *ngIf="prenomCtrl.invalid && prenomCtrl.touched">
+                Le prénom est requis
+              </p>
+            </div>
+
+            <div class="champ">
+              <label for="nom">Nom</label>
+              <input
+                id="nom"
+                type="text"
+                placeholder="Diop"
+                autocomplete="family-name"
+                [(ngModel)]="nom"
+                name="nom"
+                #nomCtrl="ngModel"
+                required
+              />
+              <p class="champ__erreur" *ngIf="nomCtrl.invalid && nomCtrl.touched">
+                Le nom est requis
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== COORDONNÉES ===== -->
+        <section class="section">
+          <h2 class="section__titre">Coordonnées</h2>
+
+          <div class="champ">
+            <label for="mail">Adresse email</label>
+            <div class="champ__saisie">
+              <svg class="champ__icone" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              </svg>
+              <input
+                id="mail"
+                type="email"
+                placeholder="vous@exemple.com"
+                autocomplete="email"
+                [(ngModel)]="mail"
+                name="mail"
+                #mailCtrl="ngModel"
+                required
+                email
+              />
+            </div>
+            <p class="champ__erreur" *ngIf="mailCtrl.invalid && mailCtrl.touched">
+              <span *ngIf="mailCtrl.errors?.['required']"
+                >L'email est requis pour la connexion</span
+              >
+              <span *ngIf="mailCtrl.errors?.['email']">Format d'email invalide</span>
+            </p>
+          </div>
+
+          <div class="grille grille--2">
+            <div class="champ">
+              <label for="telephone">Téléphone</label>
+              <div class="champ__saisie">
+                <span class="champ__prefixe">+221</span>
+                <input
+                  id="telephone"
+                  type="tel"
+                  placeholder="77 123 45 67"
+                  autocomplete="tel"
+                  [(ngModel)]="telephone"
+                  name="telephone"
+                  #telCtrl="ngModel"
+                  pattern="[0-9]{9}"
+                />
+              </div>
+              <p class="champ__erreur" *ngIf="telCtrl.invalid && telCtrl.touched">
+                9 chiffres, sans espaces ni indicatif
+              </p>
+            </div>
+
+            <div class="champ">
+              <label for="adresse">Adresse</label>
+              <input
+                id="adresse"
+                type="text"
+                placeholder="Quartier, ville"
+                autocomplete="street-address"
+                [(ngModel)]="adresse"
+                name="adresse"
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== VÉHICULE (facultatif) ===== -->
+        <section class="section">
+          <h2 class="section__titre">
+            Votre véhicule
+            <span class="section__option">facultatif</span>
+          </h2>
+          <p class="section__aide">
+            Renseigné, il nous permet de vous proposer les pièces compatibles en priorité.
+          </p>
+
+          <div class="grille grille--2">
+            <div class="champ">
+              <label for="marque">Marque</label>
+              <select
+                id="marque"
+                class="select"
+                [(ngModel)]="marque_vehicule"
+                name="marque_vehicule"
+                (ngModelChange)="onMarqueChange($event)"
+              >
+                <option value="">Choisir une marque</option>
+                <option *ngFor="let m of marques" [value]="m.nom">{{ m.nom }}</option>
+              </select>
+            </div>
+
+            <div class="champ">
+              <label for="modele">Modèle</label>
+              <select
+                id="modele"
+                class="select"
+                [(ngModel)]="modele_vehicule"
+                name="modele_vehicule"
+                [disabled]="!marque_vehicule || chargementModeles"
+              >
+                <option value="">
+                  {{ chargementModeles ? 'Chargement…' : 'Choisir un modèle' }}
+                </option>
+                <option *ngFor="let mo of modeles" [value]="mo.modele">{{ mo.modele }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="champ">
+            <label for="annee">Année</label>
+            <select id="annee" class="select" [(ngModel)]="annee" name="annee">
+              <option value="">Choisir une année</option>
+              <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- ===== MOT DE PASSE ===== -->
+        <section class="section">
+          <h2 class="section__titre">Mot de passe</h2>
+
+          <div class="champ">
+            <label for="password">Choisissez un mot de passe</label>
+            <div class="champ__saisie">
+              <svg class="champ__icone" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <input
+                id="password"
+                [type]="voirMotDePasse ? 'text' : 'password'"
+                placeholder="6 caractères minimum"
+                autocomplete="new-password"
+                [(ngModel)]="password"
+                name="password"
+                #passwordCtrl="ngModel"
+                required
+                minlength="6"
+              />
+              <button
+                type="button"
+                class="champ__oeil"
+                (click)="voirMotDePasse = !voirMotDePasse"
+                [attr.aria-label]="voirMotDePasse ? 'Masquer' : 'Afficher'"
+              >
+                <svg *ngIf="!voirMotDePasse" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                <svg *ngIf="voirMotDePasse" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M10.6 5.2A9.9 9.9 0 0 1 12 5c6.4 0 10 7 10 7a18 18 0 0 1-2.4 3.3" />
+                  <path d="M6.6 6.7A18 18 0 0 0 2 12s3.6 7 10 7a9.8 9.8 0 0 0 4.2-.9" />
+                  <path d="M3 3l18 18" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Robustesse : un repère visuel vaut mieux qu'une règle écrite -->
+            <div class="force" *ngIf="password">
+              <div class="force__barres">
+                <span
+                  [class.is-on]="forceMotDePasse.niveau >= 1"
+                  [ngClass]="forceMotDePasse.classe"
+                ></span>
+                <span
+                  [class.is-on]="forceMotDePasse.niveau >= 2"
+                  [ngClass]="forceMotDePasse.classe"
+                ></span>
+                <span
+                  [class.is-on]="forceMotDePasse.niveau >= 3"
+                  [ngClass]="forceMotDePasse.classe"
+                ></span>
+                <span
+                  [class.is-on]="forceMotDePasse.niveau >= 4"
+                  [ngClass]="forceMotDePasse.classe"
+                ></span>
+              </div>
+              <span class="force__libelle" [ngClass]="forceMotDePasse.classe">
+                {{ forceMotDePasse.libelle }}
+              </span>
+            </div>
+
+            <p class="champ__erreur" *ngIf="passwordCtrl.invalid && passwordCtrl.touched">
+              6 caractères minimum
+            </p>
+          </div>
+
+          <div class="champ">
+            <label for="confirmation">Confirmez le mot de passe</label>
+            <div class="champ__saisie">
+              <svg class="champ__icone" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <input
+                id="confirmation"
+                [type]="voirMotDePasse ? 'text' : 'password'"
+                placeholder="Saisissez-le à nouveau"
+                autocomplete="new-password"
+                [(ngModel)]="confirmation"
+                name="confirmation"
+                #confirmCtrl="ngModel"
+                required
+              />
+            </div>
+            <p class="champ__erreur" *ngIf="confirmation && confirmation !== password">
+              Les deux mots de passe ne correspondent pas
+            </p>
+          </div>
+        </section>
+
+        <button
+          type="submit"
+          class="btn-creer"
+          [disabled]="!compteForm.form.valid || confirmation !== password || isLoading"
+        >
+          <span class="spin" *ngIf="isLoading"></span>
+          {{ isLoading ? 'Création en cours…' : 'Créer mon compte' }}
+        </button>
+
+        <p class="mention">
+          En créant un compte, vous acceptez d'être contacté au sujet de vos commandes.
+        </p>
+
+        <!-- Messages -->
+        <div class="message message--ok" *ngIf="successMessage">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+          <span>
+            {{ successMessage }}
+            <em>Redirection en cours…</em>
+          </span>
+        </div>
+
+        <div class="message message--ko" *ngIf="errorMessage">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 8v4m0 4h.01" />
+          </svg>
+          <span>{{ errorMessage }}</span>
+        </div>
+      </form>
+
+      <p class="panneau__inscription">
+        Vous avez déjà un compte ?
+        <a routerLink="/login">Se connecter</a>
+      </p>
+
+      <a routerLink="/" class="panneau__retour">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+        Retour au catalogue
+      </a>
+    </div>
+  </main>
+</div>

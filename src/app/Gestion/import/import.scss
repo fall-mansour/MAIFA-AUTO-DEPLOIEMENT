@@ -1,0 +1,994 @@
+// ============================================================
+//  MAIFA-AUTO — IMPORT ET EXPORT
+//  Palette du logo : bleu nuit + orange
+// ============================================================
+
+$nuit: #12314b;
+$nuit-clair: #1d4a71;
+$orange: #f2762e;
+$orange-pale: #fef3ec;
+
+$page: #f5f8fd;
+$carte: #ffffff;
+$ligne: #e6ecf7;
+$ligne-forte: #d3ddee;
+
+$texte: #12314b;
+$doux: #5d6f96;
+$pale: #93a2c0;
+
+$vert: #16a34a;
+$vert-pale: #ecfdf5;
+$ambre: #e08e00;
+$ambre-pale: #fffbf0;
+$rouge: #dc2626;
+$rouge-pale: #fef2f2;
+
+$ombre-sm:
+  0 1px 2px rgba(18, 49, 75, 0.04),
+  0 4px 14px rgba(18, 49, 75, 0.05);
+$ombre-md: 0 10px 30px rgba(18, 49, 75, 0.1);
+
+$r-sm: 10px;
+$r-md: 14px;
+$r-lg: 20px;
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: $page;
+  color: $texte;
+  font-family: 'Barlow', 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 24px 80px;
+}
+
+// ===== BARRE HAUTE =====
+.entete {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 24px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid $ligne;
+
+  .logo {
+    height: 44px;
+  }
+
+  &__titre {
+    flex: 1;
+    min-width: 0;
+
+    h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: $nuit;
+    }
+
+    p {
+      margin: 1px 0 0;
+      font-size: 0.86rem;
+      color: $pale;
+    }
+  }
+
+  &__nav {
+    display: flex;
+    gap: 18px;
+
+    a {
+      color: $doux;
+      font-size: 0.93rem;
+      font-weight: 600;
+      text-decoration: none;
+
+      &:hover {
+        color: $orange;
+      }
+    }
+  }
+}
+
+// ===== FIL DES ÉTAPES =====
+.fil {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 24px;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex: 1;
+    padding: 11px 16px;
+    background: $carte;
+    border: 1px solid $ligne;
+    border-radius: 99px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $pale;
+
+    span {
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: #eef2f9;
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    &.is-active {
+      border-color: $orange;
+      color: $nuit;
+
+      span {
+        background: $orange;
+        color: $nuit;
+      }
+    }
+
+    &.is-faite {
+      color: $doux;
+
+      span {
+        background: $vert;
+        color: #fff;
+      }
+    }
+  }
+}
+
+// ===== ALERTES =====
+.alerte {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  border-radius: $r-md;
+  font-size: 0.91rem;
+
+  svg {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+  }
+
+  &--erreur {
+    background: $rouge-pale;
+    border: 1px solid rgba($rouge, 0.3);
+    color: #991b1b;
+  }
+
+  &--info {
+    background: $ambre-pale;
+    border: 1px solid rgba($ambre, 0.3);
+    color: #8a5a00;
+  }
+}
+
+// ===== CARTES =====
+.carte {
+  padding: 24px;
+  margin-bottom: 16px;
+  background: $carte;
+  border: 1px solid $ligne;
+  border-radius: $r-lg;
+  box-shadow: $ombre-sm;
+
+  h2 {
+    margin: 0 0 6px;
+    font-size: 1.12rem;
+    font-weight: 800;
+    color: $nuit;
+  }
+
+  h3 {
+    margin: 0 0 10px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $pale;
+  }
+
+  &__intro {
+    margin: 0 0 18px;
+    font-size: 0.91rem;
+    color: $doux;
+  }
+
+  &--note {
+    background: #fbfcfe;
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 0.88rem;
+      color: $doux;
+
+      li + li {
+        margin-top: 6px;
+      }
+    }
+  }
+
+  &--succes {
+    display: grid;
+    place-items: center;
+    gap: 6px;
+    padding: 36px 24px;
+    text-align: center;
+    background: $vert-pale;
+    border-color: rgba($vert, 0.25);
+
+    svg {
+      width: 48px;
+      height: 48px;
+      fill: none;
+      stroke: $vert;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    h2 {
+      margin: 6px 0 0;
+      font-size: 1.3rem;
+    }
+
+    p {
+      margin: 0;
+      color: #065f46;
+    }
+  }
+}
+
+// ===== ÉTAPE 1 : DÉPÔT =====
+.grille-depot {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.carte--depot {
+  margin-bottom: 0;
+}
+
+.colonne-aide .carte:last-child {
+  margin-bottom: 0;
+}
+
+.depot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 210px;
+  padding: 26px;
+  margin-bottom: 18px;
+  border: 2px dashed $ligne-forte;
+  border-radius: $r-md;
+  background: #fbfcfe;
+  text-align: center;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+
+  input[type='file'] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  &.is-survol {
+    border-color: $orange;
+    background: $orange-pale;
+  }
+
+  &.is-rempli {
+    border-style: solid;
+    border-color: rgba($vert, 0.4);
+    background: $vert-pale;
+  }
+
+  &__vide {
+    display: grid;
+    place-items: center;
+    gap: 7px;
+
+    svg {
+      width: 42px;
+      height: 42px;
+      fill: none;
+      stroke: $pale;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    strong {
+      font-size: 1rem;
+      color: $nuit;
+    }
+
+    span {
+      font-size: 0.86rem;
+      color: $pale;
+    }
+  }
+
+  &__fichier {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: #fff;
+    border: 1px solid rgba($vert, 0.3);
+    border-radius: $r-sm;
+    text-align: left;
+
+    svg {
+      width: 30px;
+      height: 30px;
+      flex-shrink: 0;
+      fill: none;
+      stroke: $vert;
+      stroke-width: 1.7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    strong {
+      display: block;
+      font-size: 0.93rem;
+      word-break: break-all;
+    }
+
+    span {
+      font-size: 0.82rem;
+      color: $pale;
+    }
+
+    button {
+      padding: 7px 13px;
+      border: 1px solid $ligne-forte;
+      border-radius: 99px;
+      background: #fff;
+      color: $doux;
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+
+      &:hover {
+        border-color: $rouge;
+        color: $rouge;
+      }
+    }
+  }
+}
+
+// ===== BOUTONS =====
+.btn {
+  display: inline-block;
+  width: 100%;
+  padding: 13px 20px;
+  border: 1px solid transparent;
+  border-radius: 99px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+
+  // Texte bleu nuit sur orange : contraste 6,39:1
+  &--principal {
+    background: $orange;
+    color: $nuit;
+    box-shadow: 0 5px 16px rgba($orange, 0.32);
+  }
+
+  &--secondaire {
+    background: #fff;
+    border-color: $ligne-forte;
+    color: $nuit;
+
+    &:hover:not(:disabled) {
+      border-color: $orange;
+      color: $orange;
+    }
+  }
+}
+
+.lien-discret {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: $doux;
+  font-family: inherit;
+  font-size: 0.88rem;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    color: $rouge;
+  }
+}
+
+// ===== ÉTAPE 2 : APERÇU =====
+.bandeau {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 20px;
+  margin-bottom: 16px;
+  background: $carte;
+  border: 1px solid $ligne;
+  border-radius: $r-md;
+
+  &__fichier {
+    strong {
+      font-size: 0.98rem;
+      word-break: break-all;
+    }
+
+    span {
+      margin-left: 8px;
+      font-size: 0.86rem;
+      color: $pale;
+    }
+  }
+}
+
+.chiffres {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.chiffre {
+  padding: 18px 20px;
+  background: $carte;
+  border: 1px solid $ligne;
+  border-radius: $r-md;
+  box-shadow: $ombre-sm;
+
+  &__valeur {
+    display: block;
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: $nuit;
+  }
+
+  &__label {
+    font-size: 0.86rem;
+    color: $doux;
+  }
+
+  &--alerte {
+    background: $rouge-pale;
+    border-color: rgba($rouge, 0.3);
+
+    .chiffre__valeur {
+      color: $rouge;
+    }
+  }
+}
+
+// ===== ONGLETS =====
+.onglets {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 14px;
+  background: #fff;
+  border: 1px solid $ligne;
+  border-radius: 99px;
+  overflow-x: auto;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    border: 0;
+    border-radius: 99px;
+    background: transparent;
+    color: $doux;
+    font-family: inherit;
+    font-size: 0.89rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+
+    em {
+      display: inline-grid;
+      place-items: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 99px;
+      background: $rouge;
+      color: #fff;
+      font-style: normal;
+      font-size: 0.74rem;
+      font-weight: 800;
+    }
+
+    &:hover {
+      color: $nuit;
+    }
+
+    &.is-actif {
+      background: $nuit;
+      color: #fff;
+
+      em {
+        background: $orange;
+        color: $nuit;
+      }
+    }
+  }
+}
+
+// ===== LIGNES =====
+.lignes {
+  margin-bottom: 18px;
+}
+
+.ligne {
+  margin-bottom: 9px;
+  background: $carte;
+  border: 1px solid $ligne;
+  border-left: 3px solid $ligne;
+  border-radius: $r-sm;
+  overflow: hidden;
+
+  &.est-pret {
+    border-left-color: $vert;
+  }
+  &.est-a_confirmer {
+    border-left-color: $ambre;
+  }
+  &.est-anomalie {
+    border-left-color: $rouge;
+  }
+  &.est-ignoree {
+    border-left-color: $ligne-forte;
+    opacity: 0.55;
+  }
+
+  &__tete {
+    display: grid;
+    grid-template-columns: 10px 48px minmax(0, 1fr) auto auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px;
+  }
+
+  &__num {
+    font-size: 0.82rem;
+    color: $pale;
+  }
+
+  &__objet {
+    min-width: 0;
+
+    strong {
+      display: block;
+      font-size: 0.94rem;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    span {
+      font-size: 0.8rem;
+      color: $pale;
+    }
+  }
+
+  &__statut {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: $doux;
+    white-space: nowrap;
+  }
+}
+
+.pastille {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: $ligne-forte;
+
+  &--pret {
+    background: $vert;
+  }
+  &--a_confirmer {
+    background: $ambre;
+  }
+  &--anomalie {
+    background: $rouge;
+  }
+}
+
+.etiquette {
+  padding: 4px 11px;
+  border-radius: 99px;
+  background: #eef2f9;
+  color: $doux;
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.btn-ecarter {
+  padding: 6px 13px;
+  border: 1px solid $ligne-forte;
+  border-radius: 99px;
+  background: #fff;
+  color: $doux;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: $rouge;
+    color: $rouge;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.motifs {
+  margin: 0;
+  padding: 0 16px 12px 86px;
+  list-style: none;
+  font-size: 0.86rem;
+
+  li {
+    position: relative;
+    padding-left: 15px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+  }
+
+  .motif--erreur {
+    color: $rouge;
+  }
+  .motif--avertissement {
+    color: #8a5a00;
+  }
+  .motif--information {
+    color: $doux;
+  }
+}
+
+// ===== CORRECTION =====
+.correction {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 14px 16px 16px 86px;
+  background: $ambre-pale;
+  border-top: 1px solid rgba($ambre, 0.22);
+
+  &__champ {
+    flex: 1;
+    min-width: 190px;
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: $doux;
+    }
+
+    select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid $ligne-forte;
+      border-radius: $r-sm;
+      background: #fff;
+      color: $texte;
+      font-family: inherit;
+      font-size: 0.89rem;
+      cursor: pointer;
+      outline: none;
+
+      &:focus {
+        border-color: $orange;
+        box-shadow: 0 0 0 3px rgba($orange, 0.18);
+      }
+
+      &:disabled {
+        background: #f4f6fa;
+        color: $pale;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+// ===== BARRE D'ACTION =====
+.barre-action {
+  position: sticky;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding: 16px 22px;
+  background: $nuit;
+  border-radius: $r-md;
+  box-shadow: $ombre-md;
+  color: #fff;
+
+  &__texte {
+    font-size: 0.92rem;
+    color: rgba(255, 255, 255, 0.82);
+
+    strong {
+      color: #fff;
+    }
+  }
+
+  .btn {
+    width: auto;
+    min-width: 200px;
+  }
+}
+
+// ===== ÉTAPE 3 : RAPPORT =====
+.tableau {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th {
+    padding: 9px 12px;
+    border-bottom: 1px solid $ligne-forte;
+    text-align: left;
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $pale;
+  }
+
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid $ligne;
+  }
+
+  tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+.liste-simple {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.89rem;
+  color: $doux;
+
+  li + li {
+    margin-top: 7px;
+  }
+
+  .mono {
+    margin-right: 7px;
+    color: $nuit;
+    font-weight: 600;
+  }
+}
+
+.rapport__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  .btn {
+    flex: 1;
+    min-width: 200px;
+  }
+}
+
+.vide {
+  padding: 50px 24px;
+  margin-bottom: 18px;
+  background: $carte;
+  border: 1px dashed $ligne-forte;
+  border-radius: $r-lg;
+  text-align: center;
+  color: $pale;
+
+  p {
+    margin: 0;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid $orange;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// ===== TABLETTE =====
+@media (max-width: 1000px) {
+  .grille-depot {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ligne__tete {
+    grid-template-columns: 10px 48px minmax(0, 1fr) auto;
+
+    .etiquette,
+    .ligne__statut {
+      display: none;
+    }
+  }
+}
+
+// ===== MOBILE =====
+@media (max-width: 767px) {
+  .page {
+    padding: 16px 14px 60px;
+  }
+
+  .entete {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 14px;
+
+    .logo {
+      height: 36px;
+    }
+
+    &__titre {
+      h1 {
+        font-size: 1.15rem;
+      }
+      p {
+        display: none;
+      }
+    }
+
+    &__nav {
+      width: 100%;
+      overflow-x: auto;
+      gap: 14px;
+    }
+  }
+
+  .fil li {
+    padding: 9px 12px;
+    font-size: 0.8rem;
+
+    // Sur mobile, seul le numéro de l'étape en cours garde son libellé
+    &:not(.is-active) {
+      flex: 0 0 auto;
+      font-size: 0;
+      gap: 0;
+      padding: 9px;
+    }
+  }
+
+  .carte {
+    padding: 18px;
+  }
+
+  .ligne__tete {
+    grid-template-columns: 10px minmax(0, 1fr) auto;
+    gap: 10px;
+
+    .ligne__num {
+      display: none;
+    }
+  }
+
+  .motifs,
+  .correction {
+    padding-left: 38px;
+  }
+
+  .barre-action {
+    position: static;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}

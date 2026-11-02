@@ -1,0 +1,370 @@
+<!-- ================= BARRE HAUTE ================= -->
+<header class="entete">
+  <a routerLink="/" class="entete__retour" aria-label="Retour au catalogue">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+  </a>
+
+  <img src="/assets/logo-horizontal.png" alt="MAIFA-AUTO" class="logo" />
+
+  <div class="entete__title">
+    <h1>Mon profil</h1>
+    <p>Vos informations personnelles et votre véhicule</p>
+  </div>
+
+  <a routerLink="/panier" class="entete__lien">Mon panier</a>
+</header>
+
+<!-- ================= CHARGEMENT ================= -->
+<div class="etat" *ngIf="chargement">
+  <div class="etat__spin"></div>
+  <p>Chargement de votre profil…</p>
+</div>
+
+<!-- ================= ERREUR ================= -->
+<div class="etat etat--erreur" *ngIf="erreurChargement">
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 8v4m0 4h.01" />
+  </svg>
+  <h2>Profil indisponible</h2>
+  <p>{{ erreurChargement }}</p>
+  <a routerLink="/login" class="btn-principal">Se reconnecter</a>
+</div>
+
+<!-- ================= PAGE ================= -->
+<div class="page" *ngIf="profil && !chargement">
+  <!-- Carte d'identité -->
+  <section class="carte-identite">
+    <span class="carte-identite__pastille" *ngIf="!profil.avatar">{{ initiales }}</span>
+    <img
+      *ngIf="profil.avatar"
+      [src]="profil.avatar"
+      [alt]="profil.prenom"
+      class="carte-identite__photo"
+    />
+
+    <div class="carte-identite__infos">
+      <h2>{{ profil.prenom }} {{ profil.nom }}</h2>
+      <p class="mono">{{ profil.mail }}</p>
+
+      <div class="carte-identite__etiquettes">
+        <span class="etiquette" [class.is-gestion]="profil.role === 'gestionnaire'">
+          {{ profil.role === 'gestionnaire' ? 'Gestionnaire' : 'Client' }}
+        </span>
+        <span class="etiquette etiquette--google" *ngIf="profil.compte_google">
+          Compte Google
+        </span>
+        <span class="etiquette" *ngIf="profil.date_creacomte">
+          Membre depuis {{ profil.date_creacomte | date: 'MMMM yyyy' }}
+        </span>
+      </div>
+    </div>
+
+    <button type="button" class="btn-quitter" (click)="deconnexion()">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <path d="m16 17 5-5-5-5" />
+        <path d="M21 12H9" />
+      </svg>
+      <span>Déconnexion</span>
+    </button>
+  </section>
+
+  <!-- Onglets -->
+  <nav class="onglets" role="tablist">
+    <button type="button" [class.is-active]="onglet === 'infos'" (click)="onglet = 'infos'">
+      Informations
+    </button>
+    <button type="button" [class.is-active]="onglet === 'vehicule'" (click)="onglet = 'vehicule'">
+      Mon véhicule
+    </button>
+    <button type="button" [class.is-active]="onglet === 'securite'" (click)="onglet = 'securite'">
+      Sécurité
+    </button>
+  </nav>
+
+  <!-- ============== INFORMATIONS ============== -->
+  <section class="bloc" *ngIf="onglet === 'infos'">
+    <header class="bloc__tete">
+      <h2>Informations personnelles</h2>
+      <p>Elles pré-remplissent vos commandes et vos demandes de pièce.</p>
+    </header>
+
+    <form (ngSubmit)="enregistrer()">
+      <div class="grille-2">
+        <div class="champ">
+          <label for="p-prenom">Prénom</label>
+          <input id="p-prenom" type="text" [(ngModel)]="form.prenom" name="prenom" required />
+        </div>
+
+        <div class="champ">
+          <label for="p-nom">Nom</label>
+          <input id="p-nom" type="text" [(ngModel)]="form.nom" name="nom" required />
+        </div>
+
+        <div class="champ">
+          <label for="p-tel">Téléphone</label>
+          <div class="avec-prefixe">
+            <span>+221</span>
+            <input
+              id="p-tel"
+              type="tel"
+              [(ngModel)]="form.telephone"
+              name="telephone"
+              placeholder="77 123 45 67"
+            />
+          </div>
+        </div>
+
+        <div class="champ">
+          <label for="p-adresse">Adresse</label>
+          <input
+            id="p-adresse"
+            type="text"
+            [(ngModel)]="form.adresse"
+            name="adresse"
+            placeholder="Quartier, ville"
+          />
+        </div>
+      </div>
+
+      <!-- L'email se change dans l'onglet Sécurité -->
+      <div class="champ champ--fige">
+        <label>Adresse email</label>
+        <div class="fige">
+          <span class="mono">{{ profil.mail }}</span>
+          <button type="button" (click)="onglet = 'securite'">Modifier</button>
+        </div>
+      </div>
+
+      <footer class="bloc__pied" *ngIf="aDesModifications">
+        <button type="button" class="btn-neutre" (click)="annulerModifications()">Annuler</button>
+        <button type="submit" class="btn-principal" [disabled]="enregistrement">
+          <span class="spin" *ngIf="enregistrement"></span>
+          {{ enregistrement ? 'Enregistrement…' : 'Enregistrer' }}
+        </button>
+      </footer>
+    </form>
+  </section>
+
+  <!-- ============== VÉHICULE ============== -->
+  <section class="bloc" *ngIf="onglet === 'vehicule'">
+    <header class="bloc__tete">
+      <h2>Mon véhicule</h2>
+      <p>Renseigné, il nous permet de vous proposer les pièces compatibles en priorité.</p>
+    </header>
+
+    <form (ngSubmit)="enregistrer()">
+      <div class="grille-3">
+        <div class="champ">
+          <label for="p-marque">Marque</label>
+          <select
+            id="p-marque"
+            [(ngModel)]="form.marque_vehicule"
+            name="marque_vehicule"
+            (ngModelChange)="onMarqueChange($event)"
+          >
+            <option value="">Choisir une marque</option>
+            <option *ngFor="let m of marques" [value]="m.nom">{{ m.nom }}</option>
+            <!-- Marque enregistrée avant la refonte du référentiel -->
+            <option *ngIf="marqueInconnue" [value]="form.marque_vehicule">
+              {{ form.marque_vehicule }} (ancienne saisie)
+            </option>
+          </select>
+        </div>
+
+        <div class="champ">
+          <label for="p-modele">Modèle</label>
+          <select
+            id="p-modele"
+            [(ngModel)]="form.modele_vehicule"
+            name="modele_vehicule"
+            [disabled]="!form.marque_vehicule || chargementModeles"
+          >
+            <option value="">
+              {{ chargementModeles ? 'Chargement…' : 'Choisir un modèle' }}
+            </option>
+            <option *ngFor="let mo of modeles" [value]="mo.modele">{{ mo.modele }}</option>
+          </select>
+        </div>
+
+        <div class="champ">
+          <label for="p-annee">Année</label>
+          <select id="p-annee" [(ngModel)]="form.annee" name="annee">
+            <option value="">Choisir une année</option>
+            <option *ngFor="let a of annees" [value]="a">{{ a }}</option>
+          </select>
+        </div>
+      </div>
+
+      <p class="aide" *ngIf="!form.marque_vehicule">
+        Aucun véhicule enregistré pour le moment. C'est facultatif, mais utile.
+      </p>
+
+      <footer class="bloc__pied" *ngIf="aDesModifications">
+        <button type="button" class="btn-neutre" (click)="annulerModifications()">Annuler</button>
+        <button type="submit" class="btn-principal" [disabled]="enregistrement">
+          <span class="spin" *ngIf="enregistrement"></span>
+          {{ enregistrement ? 'Enregistrement…' : 'Enregistrer' }}
+        </button>
+      </footer>
+    </form>
+  </section>
+
+  <!-- ============== SÉCURITÉ ============== -->
+  <ng-container *ngIf="onglet === 'securite'">
+    <!-- Mot de passe -->
+    <section class="bloc">
+      <header class="bloc__tete">
+        <h2>{{ profil.a_mot_de_passe ? 'Changer de mot de passe' : 'Définir un mot de passe' }}</h2>
+        <p *ngIf="profil.a_mot_de_passe">
+          Choisissez un mot de passe différent de l'actuel, 6 caractères minimum.
+        </p>
+        <p *ngIf="!profil.a_mot_de_passe">
+          Votre compte a été créé avec Google. Définir un mot de passe vous permettra de vous
+          connecter aussi sans lui.
+        </p>
+      </header>
+
+      <form (ngSubmit)="changerMotDePasse()">
+        <div class="champ" *ngIf="profil.a_mot_de_passe">
+          <label for="p-ancien">Mot de passe actuel</label>
+          <input
+            id="p-ancien"
+            [type]="voirMdp ? 'text' : 'password'"
+            [(ngModel)]="ancienMdp"
+            name="ancien"
+            autocomplete="current-password"
+          />
+        </div>
+
+        <div class="grille-2">
+          <div class="champ">
+            <label for="p-nouveau">Nouveau mot de passe</label>
+            <input
+              id="p-nouveau"
+              [type]="voirMdp ? 'text' : 'password'"
+              [(ngModel)]="nouveauMdp"
+              name="nouveau"
+              autocomplete="new-password"
+            />
+          </div>
+
+          <div class="champ">
+            <label for="p-confirm">Confirmation</label>
+            <input
+              id="p-confirm"
+              [type]="voirMdp ? 'text' : 'password'"
+              [(ngModel)]="confirmationMdp"
+              name="confirmation"
+              autocomplete="new-password"
+            />
+          </div>
+        </div>
+
+        <!-- Robustesse -->
+        <div class="force" *ngIf="nouveauMdp">
+          <div class="force__barres">
+            <span
+              [class.is-on]="forceMotDePasse.niveau >= 1"
+              [ngClass]="forceMotDePasse.classe"
+            ></span>
+            <span
+              [class.is-on]="forceMotDePasse.niveau >= 2"
+              [ngClass]="forceMotDePasse.classe"
+            ></span>
+            <span
+              [class.is-on]="forceMotDePasse.niveau >= 3"
+              [ngClass]="forceMotDePasse.classe"
+            ></span>
+            <span
+              [class.is-on]="forceMotDePasse.niveau >= 4"
+              [ngClass]="forceMotDePasse.classe"
+            ></span>
+          </div>
+          <span class="force__libelle" [ngClass]="forceMotDePasse.classe">
+            {{ forceMotDePasse.libelle }}
+          </span>
+        </div>
+
+        <p class="aide aide--alerte" *ngIf="confirmationMdp && nouveauMdp !== confirmationMdp">
+          Les deux mots de passe ne correspondent pas.
+        </p>
+
+        <label class="case">
+          <input type="checkbox" [(ngModel)]="voirMdp" name="voirMdp" />
+          Afficher les mots de passe
+        </label>
+
+        <footer class="bloc__pied">
+          <button
+            type="submit"
+            class="btn-principal"
+            [disabled]="envoiMdp || !nouveauMdp || nouveauMdp !== confirmationMdp"
+          >
+            <span class="spin" *ngIf="envoiMdp"></span>
+            {{ profil.a_mot_de_passe ? 'Changer le mot de passe' : 'Définir le mot de passe' }}
+          </button>
+        </footer>
+      </form>
+    </section>
+
+    <!-- Adresse email -->
+    <section class="bloc">
+      <header class="bloc__tete">
+        <h2>Adresse email</h2>
+        <p>
+          C'est votre identifiant de connexion. Le changer demande votre mot de passe, et vous
+          devrez vous reconnecter.
+        </p>
+      </header>
+
+      <div class="encart" *ngIf="!profil.a_mot_de_passe">
+        Votre compte est lié à Google. Définissez d'abord un mot de passe pour pouvoir changer
+        d'adresse.
+      </div>
+
+      <form (ngSubmit)="changerEmail()" *ngIf="profil.a_mot_de_passe">
+        <div class="grille-2">
+          <div class="champ">
+            <label for="p-mail">Nouvelle adresse</label>
+            <input
+              id="p-mail"
+              type="email"
+              [(ngModel)]="nouveauMail"
+              name="nouveau_mail"
+              placeholder="vous@exemple.com"
+            />
+          </div>
+
+          <div class="champ">
+            <label for="p-mdp-mail">Votre mot de passe</label>
+            <input
+              id="p-mdp-mail"
+              type="password"
+              [(ngModel)]="motDePasseMail"
+              name="password"
+              autocomplete="current-password"
+            />
+          </div>
+        </div>
+
+        <footer class="bloc__pied">
+          <button
+            type="submit"
+            class="btn-principal"
+            [disabled]="envoiMail || !nouveauMail || !motDePasseMail"
+          >
+            <span class="spin" *ngIf="envoiMail"></span>
+            Changer l'adresse
+          </button>
+        </footer>
+      </form>
+    </section>
+  </ng-container>
+</div>
+
+<!-- ================= NOTIFICATION ================= -->
+<div class="notif" *ngIf="notification" [ngClass]="'is-' + notification.type" role="status">
+  {{ notification.texte }}
+</div>

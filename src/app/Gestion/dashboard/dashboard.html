@@ -1,0 +1,341 @@
+<!-- ================= BARRE HAUTE ================= -->
+<header class="entete">
+  <img src="/assets/logo-horizontal.png" alt="Teranga Motors" class="logo" />
+
+  <div class="entete__title">
+    <h1>Tableau de bord</h1>
+    <p>Vue d'ensemble de l'activité</p>
+  </div>
+
+  <nav class="entete__nav">
+    <a routerLink="/stock" routerLinkActive="is-active">Stock</a>
+
+    <a routerLink="/Commandes" routerLinkActive="is-active">
+      Commandes
+      <span class="nav-badge" *ngIf="stats && stats.commandes.en_attente > 0">
+        {{ stats.commandes.en_attente }}
+      </span>
+    </a>
+
+    <a routerLink="/ajoutpieces" class="btn-add">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+      Ajouter une pièce
+    </a>
+
+    <a routerLink="/suivi" class="btn-add">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+      Suivi
+    </a>
+  </nav>
+
+  <!-- ================= COMPTE GESTIONNAIRE ================= -->
+  <div class="gestionnaire" *ngIf="session.estConnecte()">
+    <span class="gestionnaire__pastille">{{ initiales }}</span>
+
+    <span class="gestionnaire__identite">
+      <b>{{ session.utilisateur()?.prenom }} {{ session.utilisateur()?.nom }}</b>
+      <em>Gestionnaire</em>
+    </span>
+
+    <button
+      type="button"
+      class="gestionnaire__quitter"
+      (click)="deconnexion()"
+      aria-label="Se déconnecter"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <path d="m16 17 5-5-5-5" />
+        <path d="M21 12H9" />
+      </svg>
+      <span>Déconnexion</span>
+    </button>
+  </div>
+</header>
+
+<div class="page" *ngIf="stats; else loading">
+  <!-- ================= CHIFFRE PHARE + KPI ================= -->
+  <section class="hero-grid">
+    <div class="hero">
+      <span class="hero__label">Valeur totale du stock</span>
+      <strong class="hero__value mono">
+        {{ stats.stock.valeur | number: '1.0-0' }}<em>FCFA</em>
+      </strong>
+      <div class="hero__meta">
+        <span
+          ><b class="mono">{{ stats.stock.unites | number }}</b> unités</span
+        >
+        <span>
+          <b class="mono">{{ stats.stock.prix_moyen | number: '1.0-0' }}</b> FCFA de prix moyen
+        </span>
+      </div>
+      <div class="hero__split">
+        <div class="split-bar">
+          <span class="split-bar__neuf" [style.width.%]="partNeuf"></span>
+        </div>
+        <div class="split-legend">
+          <span><i class="dot dot--blue"></i>{{ stats.stock.neuf }} neuves</span>
+          <span><i class="dot dot--slate"></i>{{ stats.stock.occasion }} d'occasion</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi">
+        <span class="kpi__label">Références</span>
+        <strong class="kpi__value mono">{{ stats.stock.references }}</strong>
+        <span class="kpi__hint">en catalogue</span>
+      </div>
+
+      <!-- Commandes en attente : cliquable vers la gestion -->
+      <a
+        class="kpi kpi--lien"
+        routerLink="/Commandes"
+        [class.kpi--alert]="stats.commandes.en_attente > 0"
+      >
+        <span class="kpi__label">Commandes en attente</span>
+        <strong class="kpi__value mono">{{ stats.commandes.en_attente }}</strong>
+        <span class="kpi__hint mono" *ngIf="stats.commandes.en_attente > 0">
+          {{ stats.commandes.montant_attente | number: '1.0-0' }} FCFA à confirmer
+        </span>
+        <span class="kpi__hint" *ngIf="stats.commandes.en_attente === 0">rien à traiter</span>
+      </a>
+
+      <div class="kpi">
+        <span class="kpi__label">Chiffre d'affaires</span>
+        <strong class="kpi__value mono">
+          {{ stats.commandes.chiffre_affaires | number: '1.0-0' }}<em>FCFA</em>
+        </strong>
+        <span class="kpi__hint">
+          {{ stats.commandes.livrees }} livrée{{ stats.commandes.livrees > 1 ? 's' : '' }},
+          {{ stats.commandes.confirmees }} en cours
+        </span>
+      </div>
+
+      <div class="kpi">
+        <span class="kpi__label">Clients inscrits</span>
+        <strong class="kpi__value mono">{{ stats.clients.total }}</strong>
+        <span class="kpi__hint" [class.is-up]="stats.clients.nouveaux_30j > 0">
+          +{{ stats.clients.nouveaux_30j }} ce mois-ci
+        </span>
+      </div>
+
+      <div class="kpi">
+        <span class="kpi__label">Modèles référencés</span>
+        <strong class="kpi__value mono">{{ stats.referentiel.modeles | number }}</strong>
+        <span class="kpi__hint">{{ stats.referentiel.marques }} marques</span>
+      </div>
+
+      <div class="kpi" [class.kpi--alert]="totalAlertes > 0">
+        <span class="kpi__label">Points d'attention</span>
+        <strong class="kpi__value mono">{{ totalAlertes }}</strong>
+        <span class="kpi__hint">sur le stock</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ALERTES ================= -->
+  <section class="alerts" *ngIf="totalAlertes > 0 || stats.commandes.en_attente > 0">
+    <a class="alert alert--green" routerLink="/Commandes" *ngIf="stats.commandes.en_attente > 0">
+      <strong class="mono">{{ stats.commandes.en_attente }}</strong>
+      <span>commande{{ stats.commandes.en_attente > 1 ? 's' : '' }} à confirmer</span>
+    </a>
+    <a class="alert alert--red" routerLink="/stock" *ngIf="stats.alertes.ruptures > 0">
+      <strong class="mono">{{ stats.alertes.ruptures }}</strong>
+      <span>en rupture de stock</span>
+    </a>
+    <a class="alert alert--amber" routerLink="/stock" *ngIf="stats.alertes.stock_faible > 0">
+      <strong class="mono">{{ stats.alertes.stock_faible }}</strong>
+      <span>sous le seuil de {{ stats.alertes.seuil }} unités</span>
+    </a>
+    <a class="alert alert--blue" routerLink="/stock" *ngIf="stats.alertes.sans_compatibilite > 0">
+      <strong class="mono">{{ stats.alertes.sans_compatibilite }}</strong>
+      <span>sans véhicule rattaché, invisibles du catalogue</span>
+    </a>
+  </section>
+
+  <!-- ================= GRAPHIQUES ================= -->
+  <section class="charts">
+    <!-- Répartition par catégorie -->
+    <article class="card">
+      <div class="card__head">
+        <h2>Répartition par catégorie</h2>
+        <span>{{ stats.stock.references }} références</span>
+      </div>
+
+      <div class="donut-row" *ngIf="stats.categories.length; else pasDeDonnees">
+        <div class="donut" [style.background]="donutStyle">
+          <div class="donut__hole">
+            <strong class="mono">{{ stats.categories.length }}</strong>
+            <span>catégories</span>
+          </div>
+        </div>
+
+        <ul class="legend">
+          <li *ngFor="let c of stats.categories; let i = index">
+            <i class="dot" [style.background]="couleur(i)"></i>
+            <span class="legend__nom">{{ c.nom }}</span>
+            <span class="legend__val mono">{{ c.nb }}</span>
+            <span class="legend__pct mono">{{ pourcentage(c.nb) }}</span>
+          </li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- Ajouts sur 12 mois -->
+    <article class="card">
+      <div class="card__head">
+        <h2>Ajouts au catalogue</h2>
+        <span>12 derniers mois</span>
+      </div>
+
+      <div class="bars">
+        <div class="bars__col" *ngFor="let m of stats.evolution">
+          <span class="bars__val mono" *ngIf="m.nb > 0">{{ m.nb }}</span>
+          <div class="bars__track">
+            <div
+              class="bars__fill"
+              [style.height.%]="hauteurBarre(m.nb)"
+              [class.is-empty]="m.nb === 0"
+            ></div>
+          </div>
+          <span class="bars__label">{{ moisCourt(m.mois) }}</span>
+        </div>
+      </div>
+
+      <div class="bars__footer">
+        <span
+          ><b class="mono">{{ totalAjouts }}</b> pièces ajoutées sur la période</span
+        >
+      </div>
+    </article>
+  </section>
+
+  <!-- ================= DERNIÈRES COMMANDES ================= -->
+  <section class="card card--wide" *ngIf="stats.dernieres_commandes.length">
+    <div class="card__head">
+      <h2>Dernières commandes</h2>
+      <a routerLink="/commandes">Gérer les commandes</a>
+    </div>
+
+    <table class="recent">
+      <tbody>
+        <tr *ngFor="let c of stats.dernieres_commandes">
+          <td class="recent__ref mono">{{ c.reference }}</td>
+          <td>
+            <strong>{{ c.client }}</strong>
+            <span class="recent__sub mono">{{ c.telephone }}</span>
+          </td>
+          <td>
+            <span class="statut" [ngClass]="'is-' + c.statut">
+              {{ libelleStatut(c.statut) }}
+            </span>
+          </td>
+          <td class="ta-right mono">{{ c.nb_articles }} art.</td>
+          <td class="ta-right mono">{{ c.total | number: '1.0-0' }} FCFA</td>
+          <td class="ta-right recent__date">{{ c.date_commande | date: 'dd/MM/yy' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ================= COUVERTURE ================= -->
+  <section class="charts">
+    <!-- Parc clients face au stock -->
+    <article class="card">
+      <div class="card__head">
+        <h2>Parc automobile des clients</h2>
+        <span>{{ stats.clients.avec_vehicule }} véhicules déclarés</span>
+      </div>
+
+      <ul class="parc" *ngIf="stats.parc_clients.length; else pasDeDonnees">
+        <li *ngFor="let p of stats.parc_clients">
+          <span class="parc__marque">{{ p.marque }}</span>
+          <div class="parc__track">
+            <div
+              class="parc__fill"
+              [class.is-covered]="p.couverte"
+              [style.width.%]="largeurParc(p.nb_clients)"
+            ></div>
+          </div>
+          <span class="parc__nb mono">{{ p.nb_clients }}</span>
+          <span class="parc__tag" [class.is-covered]="p.couverte">
+            {{ p.couverte ? 'couverte' : 'aucune pièce' }}
+          </span>
+        </li>
+      </ul>
+
+      <p class="card__note" *ngIf="marquesNonCouvertes > 0">
+        {{ marquesNonCouvertes }} marque{{ marquesNonCouvertes > 1 ? 's' : '' }} présente{{
+          marquesNonCouvertes > 1 ? 's' : ''
+        }}
+        chez vos clients sans aucune pièce en stock.
+      </p>
+    </article>
+
+    <!-- Marques les mieux fournies -->
+    <article class="card">
+      <div class="card__head">
+        <h2>Marques les mieux fournies</h2>
+        <span>{{ stats.referentiel.marques_couvertes }} marques couvertes</span>
+      </div>
+
+      <ul class="parc" *ngIf="stats.top_marques.length; else pasDeDonnees">
+        <li *ngFor="let m of stats.top_marques">
+          <span class="parc__marque">{{ m.marque }}</span>
+          <div class="parc__track">
+            <div class="parc__fill is-covered" [style.width.%]="largeurTop(m.nb)"></div>
+          </div>
+          <span class="parc__nb mono">{{ m.nb }}</span>
+        </li>
+      </ul>
+
+      <p class="card__note">
+        {{ stats.referentiel.compatibilites }} liaison{{
+          stats.referentiel.compatibilites > 1 ? 's' : ''
+        }}
+        pièce-véhicule enregistrée{{ stats.referentiel.compatibilites > 1 ? 's' : '' }}.
+      </p>
+    </article>
+  </section>
+
+  <!-- ================= DERNIERS AJOUTS ================= -->
+  <section class="card card--wide" *ngIf="stats.dernieres.length">
+    <div class="card__head">
+      <h2>Dernières pièces ajoutées</h2>
+      <a routerLink="/stock">Voir tout le stock</a>
+    </div>
+
+    <table class="recent">
+      <tbody>
+        <tr *ngFor="let p of stats.dernieres">
+          <td class="recent__img">
+            <img [src]="p.img_principale || 'assets/logo.jpeg'" [alt]="p.description" />
+          </td>
+          <td>
+            <strong>{{ p.description }}</strong>
+            <span class="recent__sub mono">{{ p.ref || 'sans référence' }}</span>
+          </td>
+          <td class="recent__cat">{{ p.categorie || '—' }}</td>
+          <td class="recent__etat">
+            <span class="tag" *ngIf="p.etat">{{ p.etat }}</span>
+          </td>
+          <td class="ta-right mono">{{ p.prix | number: '1.0-0' }} FCFA</td>
+          <td class="ta-right mono">{{ p.quantite }} u.</td>
+          <td class="ta-right recent__date">{{ p.date_ajout | date: 'dd/MM/yy' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<ng-template #pasDeDonnees>
+  <p class="vide">Pas encore de données à afficher.</p>
+</ng-template>
+
+<ng-template #loading>
+  <div class="loader">
+    <div class="loader__spin"></div>
+    <p>Chargement des données…</p>
+  </div>
+</ng-template>

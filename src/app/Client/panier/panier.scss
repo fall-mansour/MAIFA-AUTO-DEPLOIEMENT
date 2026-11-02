@@ -1,0 +1,902 @@
+// ============================================================
+//  MAIFA-AUTO — PANIER
+//  Palette du logo : bleu nuit #12314B + orange #F2762E
+// ============================================================
+
+// --- Bleu nuit : structure, titres, fonds ---
+$navy-900: #081724;
+$navy-800: #0b1f30;
+$navy: #12314b; // couleur exacte du logo
+$navy-600: #1b4a6f;
+
+// --- Orange : action, points chauds ---
+// Le blanc sur orange ne donne que 2.84:1, insuffisant pour du petit
+// texte. Les boutons orange portent donc un texte bleu nuit (4.73:1).
+// $orange-700 est la seule nuance lisible en TEXTE sur blanc.
+$orange-700: #c25317;
+$orange-600: #d9631f;
+$orange: #f2762e; // couleur exacte du logo
+$orange-400: #ff9052;
+$orange-50: #fff4ed;
+
+// --- Alias conserves, pour ne rien casser dans le fichier ---
+$blue: $navy;
+$blue-hi: $navy-600;
+$blue-deep: $navy-800;
+$sky: #e7eef5;
+$sky-soft: #f4f7fa;
+
+$page: #f6f8fb;
+$card: #ffffff;
+$line: #dfe5ee;
+$line-strong: #c3cddb;
+
+$text: $navy;
+$dim: #435a76;
+
+// Nuances calees sur le seuil de lisibilite AA (4.5:1 sur blanc) :
+// le gris clair habituel n'atteignait que 2.8:1
+$mute: #647489;
+$mute-light: #8d9bb0; // bordures et icones uniquement, jamais du texte
+
+$green: #077f55;
+$amber: #9e5f08;
+$red: #cc1f1f;
+
+// Nuance plus soutenue, pour les textes poses sur un fond orange clair
+// (reference de commande) ou le $orange-700 passait sous le seuil
+$orange-800: #b04b14;
+
+$shadow-sm:
+  0 1px 2px rgba($navy, 0.06),
+  0 4px 14px rgba($navy, 0.07);
+$shadow-md: 0 10px 30px rgba($navy, 0.12);
+$shadow-orange: 0 6px 20px rgba($orange, 0.38);
+
+$r-sm: 10px;
+$r-md: 14px;
+$r-lg: 20px;
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: $page;
+  color: $text;
+  font-family: 'Barlow', 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+}
+
+// ===== EN-TÊTE =====
+.entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  background: #fff;
+  border-bottom: 1px solid $line;
+
+  &__retour {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: $dim;
+    font-size: 0.93rem;
+    font-weight: 600;
+    text-decoration: none;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    &:hover {
+      color: $orange-700;
+    }
+  }
+
+  // Logo horizontal en PNG transparent : ni pastille ni bordure
+  &__logo {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+  }
+}
+
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 24px 64px;
+}
+
+// ===== GRILLE =====
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 22px;
+  align-items: start;
+}
+
+.titre {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: $blue-deep;
+  }
+
+  span {
+    font-size: 0.92rem;
+    color: $mute;
+  }
+}
+
+// ===== LIGNES D'ARTICLES =====
+.ligne {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) auto auto auto;
+  gap: 16px;
+  align-items: center;
+  padding: 14px;
+  margin-bottom: 12px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-md;
+  box-shadow: $shadow-sm;
+
+  &__img {
+    display: block;
+    aspect-ratio: 1;
+    border-radius: $r-sm;
+    background: $sky-soft;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  &__infos {
+    min-width: 0;
+  }
+
+  &__nom {
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+    color: $blue-deep;
+    text-decoration: none;
+    line-height: 1.3;
+
+    &:hover {
+      color: $orange-700;
+    }
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 4px;
+
+    em {
+      font-style: normal;
+      font-size: 0.83rem;
+      color: $mute;
+    }
+  }
+
+  &__stock {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 2px 9px;
+    border-radius: 99px;
+    background: rgba($amber, 0.12);
+    color: $amber;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  // Sélecteur de quantité
+  &__qte {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px;
+    background: $sky-soft;
+    border: 1px solid $line;
+    border-radius: 99px;
+
+    button {
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 50%;
+      background: #fff;
+      color: $orange-700;
+      font-family: inherit;
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.15s ease;
+
+      &:hover:not(:disabled) {
+        background: $orange-50;
+      }
+
+      &:disabled {
+        color: $mute;
+        cursor: not-allowed;
+        background: transparent;
+      }
+    }
+
+    span {
+      min-width: 26px;
+      text-align: center;
+      font-weight: 700;
+    }
+  }
+
+  &__prix {
+    text-align: right;
+    min-width: 96px;
+
+    strong {
+      display: block;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: $navy;
+      letter-spacing: -0.02em;
+    }
+
+    em {
+      font-style: normal;
+      font-size: 0.78rem;
+      color: $mute;
+    }
+  }
+
+  &__retirer {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid $line;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.18s ease;
+
+    svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: $mute;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+    }
+
+    &:hover {
+      background: $red;
+      border-color: $red;
+
+      svg {
+        stroke: #fff;
+      }
+    }
+  }
+}
+
+.lien-vider {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: $mute;
+  font-family: inherit;
+  font-size: 0.88rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+
+  &:hover {
+    color: $red;
+  }
+}
+
+// ===== ALERTES =====
+.alerte {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  background: #fffdf5;
+  border: 1px solid rgba($amber, 0.4);
+  border-radius: $r-md;
+  font-size: 0.89rem;
+  color: $amber;
+
+  svg {
+    flex-shrink: 0;
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+  }
+}
+
+// ===== RÉCAPITULATIF =====
+.col-resume {
+  position: sticky;
+  top: 20px;
+}
+
+.resume {
+  padding: 22px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-lg;
+  box-shadow: $shadow-md;
+
+  h2 {
+    margin: 0 0 18px;
+    font-size: 1.12rem;
+    font-weight: 700;
+    color: $blue-deep;
+  }
+
+  &__ligne {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 7px 0;
+    font-size: 0.93rem;
+
+    &--dim {
+      color: $mute;
+    }
+  }
+
+  &__total {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 14px;
+    border-top: 1px solid $line;
+    font-size: 1rem;
+    font-weight: 600;
+
+    // Le total est le chiffre cle de la page : en orange, il attire
+    // l'oeil juste au-dessus du bouton de validation
+    strong {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: $orange-700;
+      letter-spacing: -0.03em;
+
+      em {
+        font-style: normal;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: $dim;
+        margin-left: 5px;
+      }
+    }
+  }
+}
+
+.etape {
+  margin-top: 20px;
+
+  &__note {
+    margin: 10px 0 0;
+    font-size: 0.83rem;
+    color: $mute;
+    text-align: center;
+  }
+}
+
+// ===== BOUTONS =====
+.btn-primary {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 99px;
+  background: linear-gradient(135deg, $orange-600, $orange 60%, $orange-400);
+  color: $navy-900;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: $shadow-orange;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba($orange, 0.5);
+  }
+
+  &:disabled {
+    background: $line-strong;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+}
+
+.btn-ghost {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 11px;
+  border: 1px solid $line-strong;
+  border-radius: 99px;
+  background: #fff;
+  color: $dim;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $orange;
+    color: $orange-700;
+  }
+}
+
+// ===== FORMULAIRE =====
+.form {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid $line;
+}
+
+.connecte,
+.invite {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  margin-bottom: 16px;
+  border-radius: $r-md;
+  font-size: 0.87rem;
+}
+
+.connecte {
+  background: rgba($green, 0.08);
+  color: $green;
+
+  svg {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+  }
+
+  b {
+    font-weight: 700;
+  }
+}
+
+.invite {
+  background: $sky-soft;
+  color: $dim;
+
+  p {
+    margin: 0;
+  }
+
+  a {
+    color: $orange-700;
+    font-weight: 700;
+  }
+}
+
+.champs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.champ {
+  min-width: 0;
+
+  &--large {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: $dim;
+  }
+
+  input,
+  textarea {
+    width: 100%;
+    padding: 11px 13px;
+    background: $sky-soft;
+    border: 1px solid $line;
+    border-radius: $r-md;
+    color: $text;
+    font-family: inherit;
+    font-size: 0.93rem;
+    outline: none;
+    resize: vertical;
+    transition:
+      border-color 0.18s ease,
+      box-shadow 0.18s ease,
+      background 0.18s ease;
+
+    &::placeholder {
+      color: $mute;
+    }
+
+    &:focus {
+      background: #fff;
+      border-color: $orange;
+      box-shadow: 0 0 0 4px rgba($orange, 0.16);
+    }
+  }
+}
+
+// ===== PAIEMENT =====
+.paiement {
+  margin: 18px 0 0;
+  padding: 0;
+  border: 0;
+
+  legend {
+    padding: 0;
+    margin-bottom: 10px;
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: $dim;
+  }
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  background: #fff;
+  border: 1px solid $line;
+  border-radius: $r-md;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+
+  input {
+    margin-top: 3px;
+    accent-color: $orange;
+    cursor: pointer;
+  }
+
+  span {
+    display: block;
+    min-width: 0;
+  }
+
+  b {
+    display: block;
+    font-size: 0.93rem;
+    font-weight: 700;
+    color: $text;
+  }
+
+  em {
+    font-style: normal;
+    font-size: 0.8rem;
+    color: $mute;
+  }
+
+  &:hover:not(.is-locked) {
+    border-color: $line-strong;
+  }
+
+  &.is-active {
+    border-color: $orange;
+    background: $orange-50;
+  }
+
+  &.is-locked {
+    opacity: 0.58;
+    cursor: not-allowed;
+  }
+}
+
+.erreur {
+  margin: 14px 0 0;
+  padding: 11px 14px;
+  border-radius: $r-md;
+  background: rgba($red, 0.07);
+  border: 1px solid rgba($red, 0.3);
+  color: $red;
+  font-size: 0.87rem;
+}
+
+// ===== CONFIRMATION =====
+.confirme {
+  max-width: 520px;
+  margin: 40px auto;
+  padding: 36px 30px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-lg;
+  box-shadow: $shadow-md;
+  text-align: center;
+
+  &__icone {
+    display: grid;
+    place-items: center;
+    width: 62px;
+    height: 62px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: rgba($green, 0.12);
+
+    svg {
+      width: 30px;
+      height: 30px;
+      fill: none;
+      stroke: $green;
+      stroke-width: 2.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+  }
+
+  h1 {
+    margin: 0 0 8px;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: $blue-deep;
+  }
+
+  &__ref {
+    display: inline-block;
+    margin: 0 0 16px;
+    padding: 6px 16px;
+    border-radius: 99px;
+    background: $orange-50;
+    border: 1px solid rgba($orange, 0.3);
+    color: $orange-800;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+
+  p {
+    margin: 0 0 10px;
+    color: $dim;
+
+    b {
+      color: $text;
+    }
+  }
+
+  &__note {
+    font-size: 0.87rem;
+    color: $mute;
+  }
+
+  &__liste {
+    margin: 22px 0;
+    padding: 16px 0 0;
+    border-top: 1px solid $line;
+    list-style: none;
+    text-align: left;
+
+    li {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 0;
+      font-size: 0.9rem;
+
+      em {
+        font-style: normal;
+        color: $mute;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .btn-primary {
+    width: auto;
+    display: inline-block;
+    padding: 12px 30px;
+  }
+}
+
+// ===== PANIER VIDE =====
+.vide {
+  display: grid;
+  place-items: center;
+  gap: 12px;
+  padding: 70px 24px;
+  text-align: center;
+
+  svg {
+    width: 52px;
+    height: 52px;
+    fill: none;
+    stroke: $mute-light;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  h1 {
+    margin: 6px 0 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: $blue-deep;
+  }
+
+  p {
+    margin: 0;
+    color: $mute;
+  }
+
+  .btn-primary {
+    width: auto;
+    display: inline-block;
+    padding: 12px 30px;
+    margin-top: 10px;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid $orange;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// ===== TABLETTE =====
+@media (max-width: 980px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .col-resume {
+    position: static;
+  }
+}
+
+// ===== MOBILE =====
+@media (max-width: 767px) {
+  .page {
+    padding: 16px 14px 48px;
+  }
+
+  .ligne {
+    grid-template-columns: 68px minmax(0, 1fr) auto;
+    gap: 12px;
+
+    &__img {
+      grid-row: span 2;
+    }
+
+    &__qte {
+      grid-column: 2;
+    }
+
+    &__prix {
+      grid-column: 3;
+      grid-row: 2;
+    }
+
+    &__retirer {
+      grid-column: 3;
+      grid-row: 1;
+      justify-self: end;
+    }
+  }
+
+  .champs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .titre h1 {
+    font-size: 1.35rem;
+  }
+}
+
+// ===== REDIRECTION VERS PAYTECH =====
+.redirection {
+  display: grid;
+  place-items: center;
+  gap: 16px;
+  min-height: 60vh;
+  padding: 40px 24px;
+  text-align: center;
+
+  &__spin {
+    width: 42px;
+    height: 42px;
+    border: 3px solid $line;
+    border-top-color: $orange;
+    border-radius: 50%;
+    animation: tournerPaiement 0.8s linear infinite;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: $blue-deep;
+  }
+
+  p {
+    margin: 0;
+    max-width: 400px;
+    color: $mute;
+  }
+}
+
+@keyframes tournerPaiement {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Paiement enregistre mais notification pas encore recue :
+// ambre plutot que vert, l'operation n'est pas encore certaine
+.confirme__icone.is-attente {
+  background: rgba($amber, 0.14);
+
+  svg {
+    stroke: $amber;
+  }
+}

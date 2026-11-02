@@ -1,0 +1,599 @@
+<form class="workspace" (ngSubmit)="onSubmit()" novalidate>
+  <!-- ================= BARRE HAUTE ================= -->
+  <header class="topbar">
+    <img class="topbar__logo" src="/assets/logo-horizontal-blanc.png" alt="Teranga Motors" />
+
+    <div class="topbar__title">
+      <h1>Nouvelle pièce</h1>
+      <p>Elle apparaîtra dans le catalogue dès la publication.</p>
+    </div>
+
+    <div class="gauge" [class.gauge--full]="completion === 100">
+      <div class="gauge__bar"><span [style.width.%]="completion"></span></div>
+      <span class="gauge__value">{{ filledCount }}/{{ totalFields }} champs</span>
+    </div>
+
+    <button type="submit" class="btn-publish" [disabled]="saving">
+      {{ saving ? 'Publication…' : 'Publier la pièce' }}
+    </button>
+  </header>
+
+  <div class="layout">
+    <!-- ================= COLONNE FORMULAIRE ================= -->
+    <div class="col-form">
+      <!-- 1. Identification -->
+      <section class="panel">
+        <div class="panel__head">
+          <span class="panel__step">1</span>
+          <h2>Identification</h2>
+          <p>Ce que le client lit en premier dans la liste.</p>
+        </div>
+
+        <div class="fields">
+          <div class="field field--wide">
+            <label for="description">Désignation de la pièce</label>
+            <input
+              id="description"
+              type="text"
+              name="description"
+              [(ngModel)]="pieceData.description"
+              placeholder="Plaquettes de frein avant"
+              required
+            />
+          </div>
+
+          <div class="field">
+            <label for="categorie">Catégorie</label>
+            <select
+              id="categorie"
+              name="categorie"
+              [(ngModel)]="pieceData.categorie"
+              (ngModelChange)="onCategorieChange($event)"
+            >
+              <option value="" disabled>Choisir une catégorie</option>
+              <option *ngFor="let c of categories" [value]="c.slug">{{ c.nom }}</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="sous_categorie">Sous-catégorie</label>
+            <select
+              id="sous_categorie"
+              name="sous_categorie"
+              [(ngModel)]="pieceData.sous_categorie"
+              [disabled]="!pieceData.categorie || chargementSousCat"
+            >
+              <option value="">
+                {{ chargementSousCat ? 'Chargement…' : 'Facultatif, mais recommandé' }}
+              </option>
+              <option *ngFor="let sc of sousCategories" [value]="sc.slug">{{ sc.nom }}</option>
+            </select>
+          </div>
+
+          <!--
+            Référence FOURNISSEUR, et non interne. La référence
+            interne est générée par le serveur à l'enregistrement,
+            comme à l'import : elle ne se saisit jamais.
+          -->
+          <div class="field">
+            <label for="ref">Référence fournisseur</label>
+            <input
+              id="ref"
+              type="text"
+              name="ref"
+              class="mono"
+              [(ngModel)]="pieceData.reference"
+              placeholder="Celle qui figure sur le carton"
+            />
+            <small class="field__hint">
+              La référence interne MA-… est attribuée automatiquement à la publication.
+            </small>
+          </div>
+
+          <div class="field">
+            <label for="ref_oe">Référence constructeur (OE)</label>
+            <input
+              id="ref_oe"
+              type="text"
+              name="ref_oe"
+              class="mono"
+              [(ngModel)]="pieceData.ref_oe"
+              placeholder="7701208253"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Compatibilité véhicules -->
+      <section class="panel">
+        <div class="panel__head">
+          <span class="panel__step">2</span>
+          <h2>Véhicules compatibles</h2>
+          <p>Ajoutez chaque véhicule sur lequel la pièce se monte. Au moins un est obligatoire.</p>
+        </div>
+
+        <!-- ============================================================
+             VÉHICULES DE VOS CLIENTS
+
+             Cette liste ne se saisit pas. Elle se remplit toute
+             seule à chaque recherche par numéro de châssis faite
+             sur la page d'accueil. Le nombre de clients indique
+             quels véhicules roulent réellement, donc quelles
+             pièces valent la peine d'être stockées.
+             ============================================================ -->
+        <div class="clients-bar" *ngIf="syntheseConfig.total > 0">
+          <div class="clients-bar__text">
+            <strong>{{ syntheseConfig.rattachees }}</strong>
+            véhicule{{ syntheseConfig.rattachees > 1 ? 's' : '' }} identifié{{
+              syntheseConfig.rattachees > 1 ? 's' : ''
+            }}
+            par les recherches de vos clients
+            <em *ngIf="syntheseConfig.orphelines > 0">
+              · {{ syntheseConfig.orphelines }} hors référentiel
+            </em>
+          </div>
+
+          <button type="button" class="btn-ghost" (click)="panneauVehicules = !panneauVehicules">
+            {{ panneauVehicules ? 'Masquer' : 'Voir la liste' }}
+          </button>
+        </div>
+
+        <div class="clients-panel" *ngIf="panneauVehicules && vehiculesClients.length">
+          <div class="clients-row" *ngFor="let c of vehiculesClients">
+            <div class="clients-row__who">
+              <strong>{{ c.affiche_marque }} {{ c.affiche_modele }}</strong>
+              <span>{{ c.libelle }}</span>
+            </div>
+
+            <span class="clients-row__count" [class.is-hot]="c.vues >= 3">
+              {{ c.vues }} client{{ c.vues > 1 ? 's' : '' }}
+            </span>
+
+            <button
+              type="button"
+              class="btn-attach"
+              [disabled]="dejaRetenue(c)"
+              (click)="ajouterDepuisConfiguration(c)"
+            >
+              {{ dejaRetenue(c) ? 'Ajouté' : 'Rattacher' }}
+            </button>
+          </div>
+
+          <p class="clients-panel__note" *ngIf="syntheseConfig.orphelines > 0">
+            {{ syntheseConfig.orphelines }} véhicule{{
+              syntheseConfig.orphelines > 1 ? 's' : ''
+            }}
+            recherché{{ syntheseConfig.orphelines > 1 ? 's' : '' }} par des clients
+            {{ syntheseConfig.orphelines > 1 ? 'ne figurent' : 'ne figure' }} pas dans vos marques
+            et modèles, et ne {{ syntheseConfig.orphelines > 1 ? 'peuvent' : 'peut' }} donc pas être
+            rattaché{{ syntheseConfig.orphelines > 1 ? 's' : '' }}. Complétez le référentiel pour
+            les récupérer.
+          </p>
+        </div>
+
+        <!-- ============================================================
+             NUMÉRO DE CHÂSSIS SOUS LES YEUX
+
+             Replié par défaut, parce que le gestionnaire n'a
+             généralement PAS le véhicule devant lui : il a un
+             carton sur une étagère. Ce champ sert aux trois cas où
+             il a vraiment un numéro.
+             ============================================================ -->
+        <details class="vin-box">
+          <summary>J'ai le numéro de châssis du véhicule</summary>
+
+          <p class="vin-box__why">
+            Un client vous l'a donné au téléphone, vous récupérez une pièce sur un véhicule de la
+            cour, ou vous avez la carte grise en main.
+          </p>
+
+          <div class="vin-box__row">
+            <input
+              type="text"
+              name="vin_gestion"
+              class="mono"
+              maxlength="17"
+              placeholder="TMBFA25J1A3149778"
+              [(ngModel)]="vinSaisi"
+              [disabled]="vinEnCours"
+            />
+            <button
+              type="button"
+              class="btn-add-compat"
+              [disabled]="!vinSaisi || vinEnCours"
+              (click)="decoderVin()"
+            >
+              {{ vinEnCours ? 'Lecture…' : 'Décoder' }}
+            </button>
+          </div>
+
+          <p class="vin-box__msg" [class.is-error]="vinErreur" *ngIf="vinMessage">
+            {{ vinMessage }}
+          </p>
+        </details>
+
+        <!-- Sélecteurs en cascade -->
+        <div class="compat-form">
+          <div class="field">
+            <label for="c-marque">Marque</label>
+            <select
+              id="c-marque"
+              name="c_marque"
+              [(ngModel)]="selection.id_marque"
+              (ngModelChange)="onMarqueChange($event)"
+            >
+              <option value="">Choisir une marque</option>
+              <option *ngFor="let m of marques" [value]="m.id">{{ m.nom }}</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="c-modele">Modèle</label>
+            <select
+              id="c-modele"
+              name="c_modele"
+              [(ngModel)]="selection.id_modele"
+              (ngModelChange)="onModeleChange($event)"
+              [disabled]="!selection.id_marque || chargementModeles"
+            >
+              <option value="">
+                {{ chargementModeles ? 'Chargement…' : 'Choisir un modèle' }}
+              </option>
+              <option *ngFor="let mo of modelesDisponibles" [value]="mo.id">{{ mo.modele }}</option>
+            </select>
+          </div>
+
+          <!--
+            TROISIÈME NIVEAU DE CASCADE.
+
+            Alimenté par les numéros de châssis décodés pour les
+            clients. Vide tant qu'aucun client n'a cherché ce
+            modèle : l'écran se comporte alors exactement comme
+            avant, en compatibilité large.
+          -->
+          <div class="field field--version">
+            <label for="c-version">
+              Version
+              <em *ngIf="versions.length"
+                >{{ versions.length }} connue{{ versions.length > 1 ? 's' : '' }}</em
+              >
+            </label>
+            <select
+              id="c-version"
+              name="c_version"
+              [(ngModel)]="selection.id_configuration"
+              (ngModelChange)="onConfigurationChange($event)"
+              [disabled]="!selection.id_modele || !versions.length"
+            >
+              <option value="">
+                {{
+                  !selection.id_modele
+                    ? 'Choisissez un modèle'
+                    : versions.length
+                      ? 'Toutes versions'
+                      : 'Aucune version connue'
+                }}
+              </option>
+              <option *ngFor="let v of versions" [value]="v.id">
+                {{ v.libelle }} · {{ v.vues }} client{{ v.vues > 1 ? 's' : '' }}
+              </option>
+            </select>
+          </div>
+
+          <div class="field field--small">
+            <label for="c-min">De</label>
+            <select id="c-min" name="c_min" [(ngModel)]="selection.annee_min">
+              <option value="">Année</option>
+              <option *ngFor="let a of annees" [value]="a">{{ a }}</option>
+            </select>
+          </div>
+
+          <div class="field field--small">
+            <label for="c-max">À</label>
+            <select id="c-max" name="c_max" [(ngModel)]="selection.annee_max">
+              <option value="">Année</option>
+              <option *ngFor="let a of annees" [value]="a">{{ a }}</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="c-moteur">Motorisation</label>
+            <input
+              id="c-moteur"
+              type="text"
+              name="c_moteur"
+              [(ngModel)]="selection.motorisation"
+              [disabled]="!!selection.id_configuration"
+              [placeholder]="
+                selection.id_configuration ? 'Portée par la version' : '1.5 dCi (facultatif)'
+              "
+            />
+          </div>
+
+          <button
+            type="button"
+            class="btn-add-compat"
+            [disabled]="!selection.id_modele"
+            (click)="ajouterCompatibilite()"
+          >
+            Ajouter
+          </button>
+        </div>
+
+        <!-- Liste des véhicules retenus -->
+        <div class="compat-list" *ngIf="compatibilites.length">
+          <div
+            class="compat-chip"
+            [class.compat-chip--precise]="c.id_configuration"
+            *ngFor="let c of compatibilites; let i = index"
+          >
+            <div class="compat-chip__text">
+              <strong>{{ c.marque }} {{ c.modele }}</strong>
+              <span *ngIf="c.version" class="compat-chip__version">{{ c.version }}</span>
+              <span *ngIf="!c.version && (c.annee_min || c.annee_max)">
+                {{ c.annee_min || '…' }} – {{ c.annee_max || '…' }}
+              </span>
+              <span *ngIf="!c.version && c.motorisation">{{ c.motorisation }}</span>
+            </div>
+            <button type="button" (click)="retirerCompatibilite(i)" aria-label="Retirer">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+            </button>
+          </div>
+        </div>
+
+        <p class="compat-note" *ngIf="compatibilites.length">
+          {{ nbPrecises }} sur {{ compatibilites.length }}
+          {{ nbPrecises > 1 ? 'sont rattachées' : 'est rattachée' }} à une version précise. Les
+          autres couvrent tout le modèle, ce qui reste juste pour une pièce universelle.
+        </p>
+
+        <p class="compat-empty" *ngIf="!compatibilites.length">
+          Aucun véhicule ajouté. La pièce ne serait visible dans aucun catalogue.
+        </p>
+      </section>
+
+      <!-- 3. Prix et stock -->
+      <section class="panel">
+        <div class="panel__head">
+          <span class="panel__step">3</span>
+          <h2>Prix et stock</h2>
+          <p>Le stock passe en alerte en dessous de 3 unités.</p>
+        </div>
+
+        <div class="fields">
+          <div class="field">
+            <label for="prix">Prix de vente</label>
+            <div class="input-unit">
+              <input
+                id="prix"
+                type="number"
+                name="prix"
+                class="mono"
+                [(ngModel)]="pieceData.prix"
+                placeholder="0"
+                min="0"
+              />
+              <span>FCFA</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="quantite">Quantité en stock</label>
+            <input
+              id="quantite"
+              type="number"
+              name="quantite"
+              class="mono"
+              [(ngModel)]="pieceData.quantite"
+              placeholder="0"
+              min="0"
+            />
+          </div>
+
+          <div class="field">
+            <label>État</label>
+            <div class="segmented">
+              <button
+                type="button"
+                *ngFor="let e of etats"
+                [class.is-active]="pieceData.etat === e"
+                (click)="pieceData.etat = e"
+              >
+                {{ e }}
+              </button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="fournisseur">Fournisseur</label>
+            <input
+              id="fournisseur"
+              type="text"
+              name="fournisseur"
+              [(ngModel)]="pieceData.fournisseur"
+              placeholder="Bosch, Valeo, etc."
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Photos -->
+      <section class="panel">
+        <div class="panel__head">
+          <span class="panel__step">4</span>
+          <h2>Photos</h2>
+          <p>
+            La photo principale et les photos 1 et 2 sont obligatoires. Glissez vos fichiers ou
+            cliquez sur une case. JPG ou PNG, 2 Mo maximum.
+          </p>
+        </div>
+
+        <div
+          class="drop drop--main"
+          [class.is-filled]="previews['img_principale']"
+          [class.is-over]="dragTarget === 'img_principale'"
+          (dragover)="onDragOver($event, 'img_principale')"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event, 'img_principale')"
+        >
+          <input
+            type="file"
+            accept="image/*"
+            aria-label="Photo principale"
+            (change)="onFileSelect($event, 'img_principale')"
+          />
+
+          <img *ngIf="previews['img_principale']" [src]="previews['img_principale']" alt="" />
+
+          <div class="drop__empty" *ngIf="!previews['img_principale']">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M4 16.5V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1.5Zm0 0 4.6-4.3a1.5 1.5 0 0 1 2 0L14 15m0 0 2.2-2a1.5 1.5 0 0 1 2 0L20 14.5M15 8.5h.01"
+              />
+            </svg>
+            <strong>Photo principale</strong>
+            <span>Celle qui s'affiche dans le catalogue</span>
+          </div>
+
+          <div class="drop__tools" *ngIf="previews['img_principale']">
+            <span class="drop__name">{{ fileNames['img_principale'] }}</span>
+            <button type="button" (click)="removeImage('img_principale')">Retirer</button>
+          </div>
+        </div>
+
+        <div class="drop-grid">
+          <div
+            class="drop"
+            *ngFor="let i of [1, 2, 3, 4]"
+            [class.is-filled]="previews['img' + i]"
+            [class.is-over]="dragTarget === 'img' + i"
+            (dragover)="onDragOver($event, 'img' + i)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event, 'img' + i)"
+          >
+            <input
+              type="file"
+              accept="image/*"
+              [attr.aria-label]="'Photo ' + i"
+              (change)="onFileSelect($event, 'img' + i)"
+            />
+
+            <img *ngIf="previews['img' + i]" [src]="previews['img' + i]" alt="" />
+
+            <div class="drop__empty" *ngIf="!previews['img' + i]">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              <span>Photo {{ i }}<em *ngIf="i <= 2">*</em></span>
+            </div>
+
+            <button
+              type="button"
+              class="drop__clear"
+              *ngIf="previews['img' + i]"
+              (click)="removeImage('img' + i)"
+              aria-label="Retirer la photo"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <button type="submit" class="btn-publish btn-publish--mobile" [disabled]="saving">
+        {{ saving ? 'Publication…' : 'Publier la pièce' }}
+      </button>
+    </div>
+
+    <!-- ================= COLONNE APERÇU ================= -->
+    <aside class="col-preview">
+      <div class="preview">
+        <div class="preview__head">
+          <h2>Aperçu catalogue</h2>
+          <span>{{ gallery.length }} photo{{ gallery.length > 1 ? 's' : '' }}</span>
+        </div>
+
+        <div class="stage">
+          <img *ngIf="activeImage" [src]="activeImage" alt="Aperçu de la pièce" />
+          <div class="stage__empty" *ngIf="!activeImage">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M4 16.5V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1.5Zm0 0 4.6-4.3a1.5 1.5 0 0 1 2 0L14 15"
+              />
+            </svg>
+            <p>Ajoutez une photo pour voir la fiche</p>
+          </div>
+
+          <span class="stage__tag" *ngIf="pieceData.etat">{{ pieceData.etat }}</span>
+        </div>
+
+        <div class="strip" *ngIf="gallery.length > 1">
+          <button
+            type="button"
+            *ngFor="let img of gallery"
+            [class.is-active]="img === activeImage"
+            (click)="activeImage = img"
+          >
+            <img [src]="img" alt="" />
+          </button>
+        </div>
+
+        <div class="preview__body">
+          <h3>{{ pieceData.description || 'Désignation de la pièce' }}</h3>
+
+          <p class="preview__vehicle" *ngIf="compatibilites.length; else aucunVehicule">
+            {{ compatibilites[0].marque }} {{ compatibilites[0].modele }}
+            <em *ngIf="compatibilites.length > 1">
+              et {{ compatibilites.length - 1 }} autre{{ compatibilites.length > 2 ? 's' : '' }}
+            </em>
+          </p>
+          <ng-template #aucunVehicule>
+            <p class="preview__vehicle">Aucun véhicule renseigné</p>
+          </ng-template>
+
+          <div class="preview__price">
+            <strong class="mono">{{ pieceData.prix || 0 | number: '1.0-0' }}</strong>
+            <span>FCFA</span>
+          </div>
+
+          <dl class="specs">
+            <div>
+              <dt>Référence fournisseur</dt>
+              <dd class="mono">{{ pieceData.reference || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Référence OE</dt>
+              <dd class="mono">{{ pieceData.ref_oe || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Catégorie</dt>
+              <dd>{{ nomCategorie() || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Sous-catégorie</dt>
+              <dd [class.is-low]="!pieceData.sous_categorie">
+                {{ nomSousCategorie() || 'non précisée' }}
+              </dd>
+            </div>
+            <div>
+              <dt>Compatibilités</dt>
+              <dd [class.is-low]="compatibilites.length === 0">
+                {{ compatibilites.length }} véhicule{{ compatibilites.length > 1 ? 's' : '' }}
+              </dd>
+            </div>
+            <div>
+              <dt>Dont versions précises</dt>
+              <dd [class.is-low]="nbPrecises === 0">{{ nbPrecises }}</dd>
+            </div>
+            <div>
+              <dt>Stock</dt>
+              <dd [class.is-low]="isLowStock" class="mono">
+                {{ pieceData.quantite || 0 }} unité{{ pieceData.quantite > 1 ? 's' : '' }}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </aside>
+  </div>
+</form>

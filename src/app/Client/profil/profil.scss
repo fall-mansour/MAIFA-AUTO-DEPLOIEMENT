@@ -1,0 +1,824 @@
+// ============================================================
+//  MAIFA-AUTO — PROFIL CLIENT
+//  Palette du logo : bleu nuit #12314B + orange #F2762E
+// ============================================================
+
+// -- Bleu nuit --
+$navy-900: #081724;
+$navy-800: #0b1f30;
+$navy: #12314b;
+$navy-600: #1b4a6f;
+$navy-400: #3f80b0;
+
+// -- Orange --
+// Le blanc sur orange ne donne que 2.84:1, insuffisant pour du petit
+// texte. Les boutons orange portent un texte bleu nuit (6.39:1).
+$orange-800: #a8480f;
+$orange-700: #c25317;
+$orange-600: #d9631f;
+$orange: #f2762e;
+$orange-400: #ff9052;
+$orange-50: #fff4ed;
+
+$page: #f6f8fb;
+$card: #ffffff;
+$line: #dfe5ee;
+$line-strong: #c3cddb;
+$sky-soft: #f4f7fa;
+
+$text: $navy;
+$dim: #435a76;
+$mute: #647489; // 4.77:1 sur blanc
+$mute-light: #8d9bb0;
+
+$green: #077f55;
+$green-bg: #edf7f3;
+$amber: #9e5f08;
+$red: #cc1f1f;
+
+$r-sm: 10px;
+$r-md: 14px;
+$r-lg: 20px;
+
+$shadow-sm:
+  0 1px 2px rgba($navy, 0.06),
+  0 4px 14px rgba($navy, 0.07);
+$shadow-md: 0 10px 30px rgba($navy, 0.12);
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: $page;
+  color: $text;
+  font-family: 'Barlow', 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+}
+
+// ============================================================
+//  BARRE HAUTE
+// ============================================================
+.entete {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 24px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid $line;
+
+  .logo {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  &__retour {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border: 1px solid $line;
+    border-radius: 50%;
+    background: #fff;
+    color: $dim;
+    text-decoration: none;
+    transition: all 0.18s ease;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    &:hover {
+      border-color: $orange;
+      background: $orange-50;
+      color: $orange-700;
+    }
+  }
+
+  &__title {
+    flex: 1;
+    min-width: 0;
+
+    h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: $navy-800;
+    }
+
+    p {
+      margin: 1px 0 0;
+      font-size: 0.85rem;
+      color: $mute;
+    }
+  }
+
+  &__lien {
+    flex-shrink: 0;
+    color: $orange-700;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+}
+
+.page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 24px 24px 64px;
+}
+
+// ============================================================
+//  CARTE D'IDENTITE
+// ============================================================
+.carte-identite {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 24px 26px;
+  margin-bottom: 20px;
+  border-radius: $r-lg;
+  background: linear-gradient(135deg, $navy-900, $navy 58%, $navy-600);
+  color: #fff;
+  box-shadow: $shadow-md;
+  position: relative;
+  overflow: hidden;
+
+  // Halo orange, comme le bloc phare du tableau de bord
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 92% 88%, rgba($orange, 0.3) 0%, transparent 55%);
+    pointer-events: none;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  &__pastille,
+  &__photo {
+    width: 62px;
+    height: 62px;
+    flex-shrink: 0;
+    border-radius: 50%;
+  }
+
+  &__pastille {
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.14);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+
+  &__photo {
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+
+  &__infos {
+    flex: 1;
+    min-width: 0;
+
+    h2 {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin: 2px 0 0;
+      font-size: 0.89rem;
+      color: rgba(255, 255, 255, 0.75);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  &__etiquettes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 10px;
+  }
+}
+
+.etiquette {
+  padding: 3px 11px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+
+  &.is-gestion {
+    background: rgba($orange, 0.28);
+    border-color: rgba($orange, 0.5);
+    color: #ffd9c0;
+  }
+
+  &--google {
+    text-transform: none;
+  }
+}
+
+.btn-quitter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+
+  svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  &:hover {
+    background: rgba($red, 0.85);
+    border-color: transparent;
+  }
+}
+
+// ============================================================
+//  ONGLETS
+// ============================================================
+.onglets {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 18px;
+  background: #fff;
+  border: 1px solid $line;
+  border-radius: 99px;
+  overflow-x: auto;
+
+  button {
+    flex: 1;
+    padding: 10px 20px;
+    border: 0;
+    border-radius: 99px;
+    background: transparent;
+    color: $dim;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.18s ease;
+
+    &:hover {
+      color: $orange-700;
+    }
+
+    &.is-active {
+      background: linear-gradient(135deg, $navy-800, $navy-600);
+      color: #fff;
+    }
+  }
+}
+
+// ============================================================
+//  BLOCS DE FORMULAIRE
+// ============================================================
+.bloc {
+  padding: 24px 26px;
+  margin-bottom: 18px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-lg;
+  box-shadow: $shadow-sm;
+
+  &__tete {
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid $line;
+
+    h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: $navy-800;
+    }
+
+    p {
+      margin: 4px 0 0;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: $mute;
+    }
+  }
+
+  &__pied {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid $line;
+  }
+}
+
+.grille-2,
+.grille-3 {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.grille-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grille-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.champ {
+  min-width: 0;
+
+  label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: $dim;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid $line;
+    border-radius: $r-md;
+    background: $sky-soft;
+    color: $text;
+    font-family: inherit;
+    font-size: 0.94rem;
+    outline: none;
+    transition: all 0.18s ease;
+
+    &::placeholder {
+      color: $mute-light;
+    }
+
+    &:hover:not(:disabled) {
+      border-color: $line-strong;
+      background: #fff;
+    }
+
+    &:focus {
+      background: #fff;
+      border-color: $orange;
+      box-shadow: 0 0 0 4px rgba($orange, 0.15);
+    }
+
+    &:disabled {
+      background: $page;
+      color: $mute;
+      cursor: not-allowed;
+    }
+  }
+
+  select {
+    appearance: none;
+    cursor: pointer;
+    padding-right: 38px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23435a76' d='M6 8L1.5 3.5h9z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 13px center;
+  }
+
+  // Champ en lecture seule : l'email se change dans l'onglet Sécurité
+  &--fige {
+    margin-top: 4px;
+  }
+}
+
+.fige {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 15px;
+  border: 1px dashed $line-strong;
+  border-radius: $r-md;
+  background: $page;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.93rem;
+    color: $dim;
+  }
+
+  button {
+    flex-shrink: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: $orange-700;
+    font-family: inherit;
+    font-size: 0.86rem;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+}
+
+.avec-prefixe {
+  position: relative;
+
+  span {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $mute;
+    pointer-events: none;
+  }
+
+  input {
+    padding-left: 58px !important;
+  }
+}
+
+.aide {
+  margin: 0;
+  font-size: 0.85rem;
+  color: $mute;
+
+  &--alerte {
+    margin-top: 10px;
+    color: $red;
+    font-weight: 600;
+  }
+}
+
+.encart {
+  padding: 14px 16px;
+  border-radius: $r-md;
+  background: $orange-50;
+  border: 1px solid rgba($orange, 0.32);
+  color: $orange-800;
+  font-size: 0.89rem;
+  line-height: 1.55;
+}
+
+.case {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 0.87rem;
+  color: $dim;
+  cursor: pointer;
+
+  input {
+    width: 16px;
+    height: 16px;
+    accent-color: $orange;
+    cursor: pointer;
+  }
+}
+
+// ============================================================
+//  ROBUSTESSE DU MOT DE PASSE
+// ============================================================
+.force {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+
+  &__barres {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+    max-width: 260px;
+
+    span {
+      flex: 1;
+      height: 4px;
+      border-radius: 99px;
+      background: $line;
+      transition: background 0.25s ease;
+
+      &.is-on {
+        &.est-faible {
+          background: $red;
+        }
+        &.est-moyen {
+          background: $amber;
+        }
+        &.est-bon {
+          background: $green;
+        }
+      }
+    }
+  }
+
+  &__libelle {
+    font-size: 0.78rem;
+    font-weight: 700;
+
+    &.est-faible {
+      color: $red;
+    }
+    &.est-moyen {
+      color: $amber;
+    }
+    &.est-bon {
+      color: $green;
+    }
+  }
+}
+
+// ============================================================
+//  BOUTONS
+// ============================================================
+.btn-principal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 12px 26px;
+  border: 0;
+  border-radius: 99px;
+  background: linear-gradient(135deg, $orange-600, $orange 60%, $orange-400);
+
+  // Texte bleu nuit : le blanc sur cet orange tombe a 2.84:1
+  color: $navy-900;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 5px 16px rgba($orange, 0.34);
+  transition: all 0.18s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 9px 24px rgba($orange, 0.46);
+  }
+
+  &:disabled {
+    background: $line;
+    color: $mute;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+}
+
+.btn-neutre {
+  padding: 12px 22px;
+  border: 1px solid $line-strong;
+  border-radius: 99px;
+  background: #fff;
+  color: $dim;
+  font-family: inherit;
+  font-size: 0.93rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $navy;
+    color: $navy;
+  }
+}
+
+.spin {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba($navy-900, 0.25);
+  border-top-color: $navy-900;
+  border-radius: 50%;
+  animation: tourner 0.7s linear infinite;
+}
+
+@keyframes tourner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ============================================================
+//  ETATS
+// ============================================================
+.etat {
+  display: grid;
+  place-items: center;
+  gap: 14px;
+  min-height: 60vh;
+  padding: 40px 24px;
+  text-align: center;
+  color: $mute;
+
+  &__spin {
+    width: 34px;
+    height: 34px;
+    border: 3px solid $line;
+    border-top-color: $orange;
+    border-radius: 50%;
+    animation: tourner 0.8s linear infinite;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: $navy-800;
+  }
+
+  p {
+    margin: 0;
+    max-width: 420px;
+  }
+
+  &--erreur svg {
+    width: 44px;
+    height: 44px;
+    fill: none;
+    stroke: $red;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+}
+
+// ============================================================
+//  NOTIFICATION
+// ============================================================
+.notif {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  z-index: 300;
+  max-width: calc(100vw - 32px);
+  padding: 13px 24px;
+  border-radius: 99px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba($navy-900, 0.25);
+  transform: translateX(-50%);
+  animation: notifEntree 0.25s ease;
+
+  &.is-ok {
+    background: $navy-800;
+    color: #fff;
+  }
+
+  &.is-ko {
+    background: $red;
+    color: #fff;
+  }
+}
+
+@keyframes notifEntree {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+:focus-visible {
+  outline: 2px solid $orange;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// ============================================================
+//  TABLETTE
+// ============================================================
+@media (max-width: 860px) {
+  .grille-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+// ============================================================
+//  MOBILE
+// ============================================================
+@media (max-width: 640px) {
+  .entete {
+    padding: 12px 14px;
+    gap: 12px;
+
+    .logo {
+      height: 34px;
+    }
+
+    &__title h1 {
+      font-size: 1.15rem;
+    }
+
+    &__title p,
+    &__lien {
+      display: none;
+    }
+  }
+
+  .page {
+    padding: 16px 14px 48px;
+  }
+
+  .carte-identite {
+    flex-wrap: wrap;
+    padding: 20px;
+
+    &__infos h2 {
+      font-size: 1.15rem;
+    }
+  }
+
+  .btn-quitter {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .bloc {
+    padding: 20px 16px;
+  }
+
+  .grille-2,
+  .grille-3 {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .bloc__pied {
+    flex-direction: column-reverse;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .onglets button {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+  }
+}

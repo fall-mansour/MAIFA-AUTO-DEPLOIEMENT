@@ -1,0 +1,901 @@
+/* =========================================================
+   MAIFA-AUTO — CRÉATION DE COMPTE
+   Palette du logo : bleu nuit #12314B + orange #F2762E
+========================================================= */
+
+/* --- Bleu nuit --- */
+$navy-900: #081724;
+$navy-800: #0b1f30;
+$navy: #12314b; // couleur exacte du logo
+$navy-600: #1b4a6f;
+$navy-400: #3f80b0;
+
+/* --- Orange ---
+   Le blanc sur orange ne donne que 2.84:1, insuffisant pour du petit
+   texte. Le bouton orange porte donc un texte bleu nuit (4.73:1).
+   $orange-700 est la seule nuance lisible en TEXTE sur blanc. */
+$orange-700: #c25317;
+$orange-600: #d9631f;
+$orange: #f2762e;
+$orange-400: #ff9052;
+$orange-50: #fff4ed;
+
+$white: #ffffff;
+$page: #f6f8fb;
+$line: #dfe5ee;
+$line-strong: #c3cddb;
+
+$text: $navy;
+$dim: #435a76;
+$mute: #647489; // 4.77:1 sur blanc
+$mute-light: #8d9bb0; // bordures et icones uniquement
+
+$green: #077f55;
+$green-bg: #edf7f3;
+$red: #cc1f1f;
+$red-bg: #fdf2f2;
+
+$font:
+  'Inter',
+  'Segoe UI',
+  system-ui,
+  -apple-system,
+  sans-serif;
+$radius: 14px;
+$radius-sm: 10px;
+$radius-full: 9999px;
+
+$shadow-md:
+  0 4px 6px rgba($navy, 0.05),
+  0 10px 15px rgba($navy, 0.08);
+$shadow-xl:
+  0 20px 50px rgba($navy, 0.16),
+  0 25px 60px rgba($navy, 0.1);
+
+$ease: cubic-bezier(0.4, 0, 0.2, 1);
+$transition: all 0.25s $ease;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================
+   STRUCTURE : deux panneaux
+========================================================= */
+:host {
+  display: block;
+  min-height: 100vh;
+  font-family: $font;
+  background: $page;
+  color: $text;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.auth {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+/* =========================================================
+   PANNEAU DE MARQUE
+========================================================= */
+.vitrine {
+  /* Le formulaire est long : le panneau de marque reste en place
+     pendant que la colonne de droite defile */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 52px;
+  color: $white;
+  overflow: hidden;
+
+  /* Photo d'atelier en fond */
+  background: url('/assets/atelier.jpg') no-repeat center center;
+  background-size: cover;
+
+  /* Voile bleu nuit a 72 %.
+     Mesure sur l'image : sans voile, le blanc tombe a 2.53:1 sur les
+     reflets metalliques les plus clairs, donc illisible. A 72 %, le
+     pire cas remonte a 6.09:1 et la moyenne a 10:1, tout en laissant
+     la photo perceptible. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(
+        165deg,
+        rgba($navy-900, 0.82) 0%,
+        rgba($navy, 0.72) 45%,
+        rgba($navy-900, 0.88) 100%
+      ),
+      radial-gradient(circle at 85% 80%, rgba($orange, 0.22) 0%, transparent 55%);
+  }
+
+  /* Degrade bas : ancre le texte du pied sur une zone franchement sombre */
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 42%;
+    background: linear-gradient(to top, rgba($navy-900, 0.75), transparent);
+  }
+
+  &__contenu {
+    position: relative;
+    z-index: 3;
+    margin: auto 0;
+    animation: fadeInUp 0.6s $ease;
+  }
+
+  &__logo {
+    height: 52px;
+    width: auto;
+    margin-bottom: 40px;
+    object-fit: contain;
+  }
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.8px;
+    margin-bottom: 12px;
+    max-width: 22ch;
+    /* Filet de securite sur les eventuels reflets residuels */
+    text-shadow: 0 2px 12px rgba($navy-900, 0.6);
+  }
+
+  &__accroche {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: rgba($white, 0.88);
+    max-width: 34ch;
+    margin-bottom: 36px;
+    text-shadow: 0 1px 8px rgba($navy-900, 0.5);
+  }
+
+  &__pied {
+    position: relative;
+    z-index: 3;
+    font-size: 0.83rem;
+    color: rgba($white, 0.6);
+  }
+}
+
+/* Arguments */
+.atouts {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: rgba($white, 0.85);
+    text-shadow: 0 1px 6px rgba($navy-900, 0.5);
+
+    b {
+      display: block;
+      color: $white;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+  }
+
+  &__puce {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba($orange, 0.22);
+    border: 1px solid rgba($orange, 0.5);
+
+    svg {
+      width: 13px;
+      height: 13px;
+      fill: none;
+      stroke: $orange-400;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+  }
+}
+
+/* =========================================================
+   PANNEAU FORMULAIRE
+========================================================= */
+.panneau {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 44px 24px 56px;
+
+  &__boite {
+    width: 100%;
+    max-width: 470px;
+    animation: fadeInUp 0.5s $ease 0.1s both;
+  }
+
+  /* Logo visible uniquement sur mobile, ou le panneau de marque disparait */
+  &__logo {
+    display: none;
+    height: 44px;
+    width: auto;
+    margin: 0 auto 28px;
+    object-fit: contain;
+  }
+
+  &__tete {
+    margin-bottom: 28px;
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.6px;
+      color: $navy-800;
+      margin-bottom: 6px;
+    }
+
+    p {
+      font-size: 0.92rem;
+      color: $mute;
+    }
+  }
+
+  &__inscription {
+    margin-top: 24px;
+    padding-top: 22px;
+    border-top: 1px solid $line;
+    text-align: center;
+    font-size: 0.9rem;
+    color: $mute;
+
+    a {
+      color: $orange-700;
+      font-weight: 700;
+      text-decoration: none;
+      margin-left: 3px;
+      border-bottom: 2px solid transparent;
+      transition: $transition;
+
+      &:hover {
+        border-bottom-color: $orange;
+      }
+    }
+  }
+
+  &__retour {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 20px;
+    color: $mute;
+    font-size: 0.86rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: $transition;
+
+    svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    &:hover {
+      color: $navy;
+      gap: 10px;
+    }
+  }
+}
+
+/* =========================================================
+   CHAMPS
+========================================================= */
+.champ {
+  margin-bottom: 18px;
+
+  label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $dim;
+  }
+
+  &__entete {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+
+    label {
+      margin-bottom: 7px;
+    }
+  }
+
+  &__oubli {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $orange-700;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+
+  &__saisie {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Icone en SVG plutot qu'en background-image : elle prend la
+     couleur du champ et devient orange au focus */
+  &__icone {
+    position: absolute;
+    left: 15px;
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: $mute-light;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+    transition: $transition;
+  }
+
+  input {
+    width: 100%;
+    padding: 14px 16px 14px 46px;
+    border: 2px solid $line;
+    border-radius: $radius-sm;
+    font-size: 0.94rem;
+    font-family: $font;
+    color: $text;
+    background: $white;
+    outline: none;
+    transition: $transition;
+
+    &::placeholder {
+      color: $mute-light;
+    }
+
+    &:hover {
+      border-color: $line-strong;
+    }
+
+    &:focus {
+      border-color: $orange;
+      box-shadow: 0 0 0 4px rgba($orange, 0.14);
+    }
+  }
+
+  /* Le champ mot de passe laisse la place au bouton d'affichage */
+  &__saisie:has(.champ__oeil) input {
+    padding-right: 46px;
+  }
+
+  &__saisie:focus-within &__icone {
+    stroke: $orange;
+  }
+
+  &__oeil {
+    position: absolute;
+    right: 8px;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: $radius-sm;
+    background: transparent;
+    cursor: pointer;
+    transition: $transition;
+
+    svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: $mute;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    &:hover {
+      background: $orange-50;
+
+      svg {
+        stroke: $orange-700;
+      }
+    }
+  }
+
+  &__erreur {
+    margin-top: 6px;
+    padding-left: 2px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: $red;
+    animation: slideInLeft 0.25s $ease;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      margin-right: 6px;
+      vertical-align: middle;
+      border-radius: 50%;
+      background: $red;
+    }
+  }
+}
+
+/* =========================================================
+   BOUTON DE CONNEXION
+========================================================= */
+.btn-creer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 15px;
+  margin-top: 6px;
+  border: 0;
+  border-radius: $radius-sm;
+  background: linear-gradient(135deg, $orange-600, $orange 60%, $orange-400);
+
+  /* Texte bleu nuit : le blanc sur cet orange tombe a 2.84:1 */
+  color: $navy-900;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: $font;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba($orange, 0.36);
+  transition: $transition;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba($orange, 0.48);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0) scale(0.99);
+  }
+
+  &:disabled {
+    background: $line;
+    color: $mute;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}
+
+.spin {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba($navy-900, 0.25);
+  border-top-color: $navy-900;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* =========================================================
+   MESSAGES
+========================================================= */
+.message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  margin-top: 18px;
+  border-radius: $radius-sm;
+  font-size: 0.89rem;
+  font-weight: 500;
+  animation: fadeInUp 0.35s $ease;
+
+  svg {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  &--ok {
+    background: $green-bg;
+    border: 1px solid rgba($green, 0.25);
+    color: $green;
+  }
+
+  &--ko {
+    background: $red-bg;
+    border: 1px solid rgba($red, 0.22);
+    color: $red;
+    animation:
+      shake 0.45s $ease,
+      fadeInUp 0.35s $ease;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid $orange;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =========================================================
+   TABLETTE : le panneau de marque se resserre
+========================================================= */
+@media (max-width: 1100px) {
+  .auth {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  }
+
+  .vitrine {
+    padding: 36px 34px;
+
+    h2 {
+      font-size: 1.6rem;
+    }
+
+    &__accroche {
+      margin-bottom: 28px;
+    }
+  }
+
+  .atouts li {
+    font-size: 0.85rem;
+  }
+}
+
+/* =========================================================
+   MOBILE : formulaire seul, logo repris en tete
+========================================================= */
+@media (max-width: 880px) {
+  .auth {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Le panneau de marque disparait : sur un petit ecran,
+     il repousserait le formulaire hors de l'ecran */
+  .vitrine {
+    display: none;
+  }
+
+  .panneau {
+    min-height: 100vh;
+    padding: 32px 20px;
+    align-items: flex-start;
+
+    &__logo {
+      display: block;
+    }
+
+    &__tete {
+      text-align: center;
+    }
+  }
+}
+
+@media (max-width: 420px) {
+  .panneau {
+    padding: 24px 16px;
+
+    &__logo {
+      height: 38px;
+      margin-bottom: 22px;
+    }
+
+    &__tete h1 {
+      font-size: 1.5rem;
+    }
+  }
+
+  .champ input {
+    padding: 13px 14px 13px 44px;
+    font-size: 0.9rem;
+  }
+
+  .btn-creer {
+    padding: 14px;
+    font-size: 0.95rem;
+  }
+}
+
+/* =========================================================
+   SÉPARATEUR SOUS LE BOUTON GOOGLE
+========================================================= */
+.separateur {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0 26px;
+  color: $mute;
+  font-size: 0.82rem;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: $line;
+  }
+}
+
+/* =========================================================
+   SECTIONS DU FORMULAIRE
+   Un formulaire d'inscription decoupe en etapes visuelles
+   est nettement moins abandonne qu'une longue liste de champs
+========================================================= */
+.section {
+  margin-bottom: 26px;
+
+  &__titre {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 14px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid $line;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: $navy-800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+
+  &__option {
+    padding: 2px 9px;
+    border-radius: $radius-full;
+    background: $line;
+    color: $mute;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: none;
+  }
+
+  &__aide {
+    margin: -6px 0 14px;
+    font-size: 0.82rem;
+    color: $mute;
+    line-height: 1.5;
+  }
+}
+
+.grille {
+  display: grid;
+  gap: 0 14px;
+
+  &--2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* =========================================================
+   LISTES DEROULANTES
+========================================================= */
+.select {
+  width: 100%;
+  padding: 14px 40px 14px 16px;
+  border: 2px solid $line;
+  border-radius: $radius-sm;
+  font-size: 0.94rem;
+  font-family: $font;
+  color: $text;
+  background-color: $white;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" fill="none" stroke="%23647489" stroke-width="1.6" stroke-linecap="round"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  transition: $transition;
+
+  &:hover:not(:disabled) {
+    border-color: $line-strong;
+  }
+
+  &:focus {
+    border-color: $orange;
+    box-shadow: 0 0 0 4px rgba($orange, 0.14);
+  }
+
+  /* Le modele reste inerte tant qu'aucune marque n'est choisie */
+  &:disabled {
+    background-color: $page;
+    color: $mute;
+    cursor: not-allowed;
+  }
+}
+
+/* =========================================================
+   INDICATEUR DE PREFIXE TELEPHONIQUE
+========================================================= */
+.champ__prefixe {
+  position: absolute;
+  left: 15px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: $mute;
+  pointer-events: none;
+}
+
+.champ__saisie:has(.champ__prefixe) input {
+  padding-left: 58px;
+}
+
+/* =========================================================
+   ROBUSTESSE DU MOT DE PASSE
+========================================================= */
+.force {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 9px;
+
+  &__barres {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+
+    span {
+      flex: 1;
+      height: 4px;
+      border-radius: $radius-full;
+      background: $line;
+      transition: background 0.25s $ease;
+
+      &.is-on {
+        &.est-faible {
+          background: $red;
+        }
+        &.est-moyen {
+          background: #a96608;
+        }
+        &.est-bon {
+          background: $green;
+        }
+      }
+    }
+  }
+
+  &__libelle {
+    font-size: 0.76rem;
+    font-weight: 700;
+    white-space: nowrap;
+
+    &.est-faible {
+      color: $red;
+    }
+    &.est-moyen {
+      color: #9e5f08;
+    }
+    &.est-bon {
+      color: $green;
+    }
+  }
+}
+
+/* =========================================================
+   MENTION SOUS LE BOUTON
+========================================================= */
+.mention {
+  margin-top: 12px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: $mute;
+  text-align: center;
+}
+
+.message em {
+  display: block;
+  font-style: normal;
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+/* =========================================================
+   RESPONSIVE PROPRE AU FORMULAIRE
+========================================================= */
+@media (max-width: 880px) {
+  .vitrine {
+    position: static;
+    height: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  /* Prenom et nom l'un sous l'autre */
+  .grille--2 {
+    grid-template-columns: 1fr;
+  }
+}
