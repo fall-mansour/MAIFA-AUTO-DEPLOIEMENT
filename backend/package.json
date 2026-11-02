@@ -1,10 +1,17 @@
 {
-  "name": "backend",
+  "name": "maifa-auto-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "API MAIFA-AUTO : catalogue, stock, commandes et decodage VIN",
+  "private": true,
+  "type": "commonjs",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
+    "verif": "node verif-casse.js",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": "24.x"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +23,7 @@
     "dotenv": "^17.4.0",
     "exceljs": "^4.4.0",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.7.2",
     "google-auth-library": "^11.0.2",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
