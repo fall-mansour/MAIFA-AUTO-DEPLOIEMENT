@@ -1,34 +1,57 @@
 {
-  "name": "maifa-auto-backend",
-  "version": "1.0.0",
-  "description": "API MAIFA-AUTO : catalogue, stock, commandes et decodage VIN",
-  "private": true,
-  "type": "commonjs",
-  "main": "server.js",
+  "name": "gestion",
+  "version": "0.0.0",
   "scripts": {
-    "start": "node server.js",
-    "verif": "node verif-casse.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "serve:ssr:gestion": "node dist/gestion/server/server.mjs"
   },
-  "engines": {
-    "node": "24.x"
+
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "angular"
+        }
+      }
+    ]
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "private": true,
   "dependencies": {
-    "bcrypt": "^6.0.0",
-    "cloudinary": "^2.10.0",
-    "cors": "^2.8.5",
-    "dotenv": "^17.4.0",
-    "exceljs": "^4.4.0",
-    "express": "^5.2.1",
-    "express-rate-limit": "^8.7.2",
-    "google-auth-library": "^11.0.2",
-    "jsonwebtoken": "^9.0.3",
-    "multer": "^2.1.1",
-    "multer-storage-cloudinary": "^4.0.0",
-    "mysql2": "^3.20.0",
-    "nodemailer": "^8.0.4"
+    "@angular/common": "^20.3.0",
+    "@angular/compiler": "^20.3.0",
+    "@angular/core": "^20.3.0",
+    "@angular/forms": "^20.3.0",
+    "@angular/platform-browser": "^20.3.0",
+    "@angular/platform-server": "^20.3.0",
+    "@angular/router": "^20.3.0",
+    "@angular/ssr": "^20.3.3",
+    "express": "^5.1.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^20.3.3",
+    "@angular/cli": "^20.3.3",
+    "@angular/compiler-cli": "^20.3.0",
+    "@types/express": "^5.0.1",
+    "@types/jasmine": "~5.1.0",
+    "@types/node": "^20.17.19",
+    "jasmine-core": "~5.9.0",
+    "karma": "~6.4.0",
+    "karma-chrome-launcher": "~3.2.0",
+    "karma-coverage": "~2.2.0",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.1.0",
+    "typescript": "~5.9.2"
   }
+
+  
+
 }
