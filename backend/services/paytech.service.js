@@ -18,9 +18,9 @@ const API_SECRET = process.env.PAYTECH_API_SECRET;
 const ENV = process.env.PAYTECH_ENV || 'test';
 
 /** Base publique du backend, en HTTPS obligatoirement pour l'IPN */
-const URL_BACKEND = process.env.URL_BACKEND || '';
+const URL_BACKEND = process.env.URL_BACKEND || 'https://maifa-auto-deploiement-backend.onrender.com';
 /** Base du front, pour les redirections apres paiement */
-const URL_FRONT = process.env.URL_FRONT || 'https://maifa-auto-deploiement-backend.onrender.com';
+const URL_FRONT = process.env.URL_FRONT || 'https://maifa-auto-deploiement-front.onrender.com';
 
 const entetes = () => ({
   Accept: 'application/json',
